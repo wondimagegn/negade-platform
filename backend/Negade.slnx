@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="Negade.Api/Negade.Api.csproj" />
+  <Project Path="Negade.Application/Negade.Application.csproj" />
+  <Project Path="Negade.Domain/Negade.Domain.csproj" />
+  <Project Path="Negade.Infrastructure/Negade.Infrastructure.csproj" />
+</Solution>
