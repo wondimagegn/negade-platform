@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Negade.Application.Abstractions;
 using Negade.Infrastructure.Data;
 
 namespace Negade.Infrastructure;
@@ -14,6 +15,7 @@ public static class DependencyInjection
 
         services.AddDbContext<ApplicationDbContext>(options =>
             options.UseNpgsql(connectionString));
+        services.AddScoped<IApplicationDbContext>(provider => provider.GetRequiredService<ApplicationDbContext>());
 
         return services;
     }

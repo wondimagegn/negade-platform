@@ -1,9 +1,11 @@
 using Microsoft.EntityFrameworkCore;
+using Negade.Application.Abstractions;
 using Negade.Domain.Entities;
 
 namespace Negade.Infrastructure.Data;
 
-public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options)
+public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+    : DbContext(options), IApplicationDbContext
 {
     public DbSet<Product> Products => Set<Product>();
 
