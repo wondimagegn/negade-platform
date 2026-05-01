@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { finalize } from 'rxjs';
 import { Product, ProductPayload } from './product.models';
 import { ProductService } from './product.service';
@@ -18,19 +18,22 @@ export class ProductPageComponent implements OnInit {
   errorMessage = '';
   editingId: string | null = null;
 
-  readonly form = this.fb.nonNullable.group({
-    name: ['', [Validators.required, Validators.maxLength(200)]],
-    description: ['', [Validators.maxLength(2000)]],
-    price: [0, [Validators.required, Validators.min(0)]],
-    stockQuantity: [0, [Validators.required, Validators.min(0)]]
-  });
+  form: FormGroup;
 
   constructor(
     private readonly fb: FormBuilder,
     private readonly productService: ProductService
-  ) {}
+  ) {
+    this.form = this.fb.nonNullable.group({
+      name: ['', [Validators.required, Validators.maxLength(200)]],
+      description: ['', [Validators.maxLength(2000)]],
+      price: [0, [Validators.required, Validators.min(0)]],
+      stockQuantity: [0, [Validators.required, Validators.min(0)]]
+    });
+  }
 
   ngOnInit(): void {
+    console.log('ProductPageComponent initialized');
     this.loadProducts();
   }
 

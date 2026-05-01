@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "start": "ng serve --open",
+    "start": "ng serve --open --proxy-config proxy.conf.json",
     "build": "ng build",
     "test": "ng test"
   },
@@ -19,10 +19,5 @@
     "rxjs": "^7.8.0",
     "tslib": "^2.8.0",
     "zone.js": "^0.15.0"
-  },
-  "devDependencies": {
-    "@angular/cli": "^20.0.0",
-    "@angular/compiler-cli": "^20.0.0",
-    "typescript": "^5.8.0"
   }
 }

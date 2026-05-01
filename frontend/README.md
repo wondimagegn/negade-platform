@@ -8,11 +8,13 @@ Basic Angular frontend for Product CRUD.
    ```bash
    npm install
    ```
-2. Start the dev server:
+2. Ensure backend API is running on `http://localhost:5199`.
+3. Start the dev server:
    ```bash
    npm start
    ```
-3. Ensure backend API is running on `http://localhost:5199`.
+
+`npm start` runs Angular with `proxy.conf.json`, so browser requests to `/api/*` stay same-origin (`http://localhost:4200`) and are proxied to the backend API.
 
 The page supports:
 - List products
