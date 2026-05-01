@@ -1,6 +1,7 @@
 {
   "name": "negade-frontend",
   "version": "0.0.1",
+  "packageManager": "yarn@1.22.22",
   "private": true,
   "scripts": {
     "start": "ng serve --open --proxy-config proxy.conf.json",
@@ -19,5 +20,11 @@
     "rxjs": "^7.8.0",
     "tslib": "^2.8.0",
     "zone.js": "^0.15.0"
+  },
+  "devDependencies": {
+    "@angular-devkit/build-angular": "^20.0.0",
+    "@angular/cli": "^20.0.0",
+    "@angular/compiler-cli": "^20.0.0",
+    "typescript": "^5.8.0"
   }
 }
