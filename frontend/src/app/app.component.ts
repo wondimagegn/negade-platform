@@ -1,12 +1,18 @@
 import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive],
   template: `
     <main class="container">
-      <h1>Product Management</h1>
+      <h1>Negade Frontend</h1>
+
+      <nav class="top-nav">
+        <a routerLink="" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Home</a>
+        <a routerLink="/products" routerLinkActive="active">Products</a>
+      </nav>
+
       <router-outlet />
     </main>
   `

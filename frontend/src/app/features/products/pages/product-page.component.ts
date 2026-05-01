@@ -2,8 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { finalize } from 'rxjs';
-import { Product, ProductPayload } from './product.models';
-import { ProductService } from './product.service';
+import { Product, ProductPayload } from '../data-access/product.models';
+import { ProductService } from '../data-access/product.service';
 
 @Component({
   selector: 'app-product-page',
