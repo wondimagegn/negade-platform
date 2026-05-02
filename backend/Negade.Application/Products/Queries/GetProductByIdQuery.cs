@@ -15,6 +15,7 @@ public class GetProductByIdQueryHandler(IApplicationDbContext dbContext, IMapper
     {
         var product = await dbContext.Products
             .AsNoTracking()
+            .Include(p => p.Supplier)
             .FirstOrDefaultAsync(p => p.Id == request.Id, cancellationToken);
 
         return product is null ? null : mapper.Map<ProductDto>(product);

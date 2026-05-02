@@ -16,6 +16,7 @@ public class CreateProductCommandHandler(IApplicationDbContext dbContext, IMappe
         var product = mapper.Map<Product>(request.Product);
         product.Id = Guid.NewGuid();
         product.CreatedAt = DateTime.UtcNow;
+        product.AvailableQuantity = product.AvailableQuantity == 0 ? product.StockQuantity : product.AvailableQuantity;
 
         await dbContext.Products.AddAsync(product, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);

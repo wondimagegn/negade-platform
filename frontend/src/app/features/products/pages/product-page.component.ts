@@ -25,10 +25,17 @@ export class ProductPageComponent implements OnInit {
     private readonly productService: ProductService
   ) {
     this.form = this.fb.nonNullable.group({
+      supplierId: [''],
       name: ['', [Validators.required, Validators.maxLength(200)]],
       description: ['', [Validators.maxLength(2000)]],
+      category: ['', [Validators.required, Validators.maxLength(100)]],
       price: [0, [Validators.required, Validators.min(0)]],
-      stockQuantity: [0, [Validators.required, Validators.min(0)]]
+      unit: ['pcs', [Validators.required, Validators.maxLength(50)]],
+      stockQuantity: [0, [Validators.required, Validators.min(0)]],
+      availableQuantity: [0, [Validators.required, Validators.min(0)]],
+      region: [''],
+      city: [''],
+      isAvailable: [true]
     });
   }
 
@@ -56,7 +63,11 @@ export class ProductPageComponent implements OnInit {
     }
 
     this.submitting = true;
-    const payload: ProductPayload = this.form.getRawValue();
+    const rawValue = this.form.getRawValue();
+    const payload: ProductPayload = {
+      ...rawValue,
+      supplierId: rawValue.supplierId || null
+    };
     const request$ = this.editingId
       ? this.productService.update(this.editingId, payload)
       : this.productService.create(payload);
@@ -75,8 +86,15 @@ export class ProductPageComponent implements OnInit {
     this.form.patchValue({
       name: product.name,
       description: product.description ?? '',
+      category: product.category,
       price: product.price,
-      stockQuantity: product.stockQuantity
+      unit: product.unit,
+      stockQuantity: product.stockQuantity,
+      availableQuantity: product.availableQuantity,
+      region: product.region,
+      city: product.city,
+      isAvailable: product.isAvailable,
+      supplierId: product.supplierId ?? ''
     });
   }
 
@@ -85,8 +103,15 @@ export class ProductPageComponent implements OnInit {
     this.form.reset({
       name: '',
       description: '',
+      category: '',
       price: 0,
-      stockQuantity: 0
+      unit: 'pcs',
+      stockQuantity: 0,
+      availableQuantity: 0,
+      region: '',
+      city: '',
+      isAvailable: true,
+      supplierId: ''
     });
   }
 

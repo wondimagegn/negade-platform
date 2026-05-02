@@ -15,6 +15,7 @@ public class GetProductsQueryHandler(IApplicationDbContext dbContext, IMapper ma
     {
         var products = await dbContext.Products
             .AsNoTracking()
+            .Include(p => p.Supplier)
             .OrderByDescending(p => p.CreatedAt)
             .ToListAsync(cancellationToken);
 

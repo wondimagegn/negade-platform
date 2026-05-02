@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Negade.Application.Common.Interfaces;
+using Negade.Infrastructure.Auth;
 using Negade.Infrastructure.Data;
 
 namespace Negade.Infrastructure;
@@ -16,6 +17,7 @@ public static class DependencyInjection
         services.AddDbContext<ApplicationDbContext>(options =>
             options.UseNpgsql(connectionString));
         services.AddScoped<IApplicationDbContext>(provider => provider.GetRequiredService<ApplicationDbContext>());
+        services.AddScoped<IJwtTokenService, JwtTokenService>();
 
         return services;
     }

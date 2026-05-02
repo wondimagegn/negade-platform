@@ -20,6 +20,7 @@ public class UpdateProductCommandHandler(IApplicationDbContext dbContext, IMappe
         }
 
         mapper.Map(request.Product, existing);
+        existing.UpdatedAt = DateTime.UtcNow;
 
         await dbContext.SaveChangesAsync(cancellationToken);
 
