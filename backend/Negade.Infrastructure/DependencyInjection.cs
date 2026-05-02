@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Negade.Application.Abstractions;
+using Negade.Application.Common.Interfaces;
 using Negade.Infrastructure.Data;
 
 namespace Negade.Infrastructure;

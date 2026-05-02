@@ -1,6 +1,6 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Negade.Application.Abstractions;
+using Negade.Application.Common.Interfaces;
 
 namespace Negade.Application.Products.Commands;
 

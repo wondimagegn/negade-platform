@@ -1,6 +1,6 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Negade.Application.DTOs;
+using Negade.Application.Products.Common;
 using Negade.Application.Products.Commands;
 using Negade.Application.Products.Queries;
 

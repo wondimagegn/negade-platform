@@ -2,7 +2,7 @@ using Mapster;
 using MapsterMapper;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
-using Negade.Application.DTOs;
+using Negade.Application.Products.Common;
 using Negade.Domain.Entities;
 
 namespace Negade.Application;

@@ -2,14 +2,15 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { finalize } from 'rxjs';
-import { Product, ProductPayload } from './product.models';
-import { ProductService } from './product.service';
+import { Product, ProductPayload } from '../../models/product.model';
+import { ProductService } from '../../services/product.service';
 
 @Component({
   selector: 'app-product-page',
+  standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './product-page.component.html',
-  styleUrl: './product-page.component.css'
+  styleUrls: ['./product-page.component.css']
 })
 export class ProductPageComponent implements OnInit {
   products: Product[] = [];

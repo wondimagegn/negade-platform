@@ -1,4 +1,4 @@
-namespace Negade.Application.DTOs;
+namespace Negade.Application.Products.Common;
 
 public record ProductDto(
     Guid Id,
