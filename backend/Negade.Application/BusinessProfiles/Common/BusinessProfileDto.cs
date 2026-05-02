@@ -2,6 +2,7 @@ namespace Negade.Application.BusinessProfiles.Common;
 
 public record BusinessProfileDto(
     Guid Id,
+    Guid? OwnerUserId,
     string BusinessName,
     string OwnerName,
     string TinNumber,

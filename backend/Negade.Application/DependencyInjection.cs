@@ -5,6 +5,7 @@ using Negade.Application.BusinessProfiles.Common;
 using Microsoft.Extensions.DependencyInjection;
 using Negade.Application.Products.Common;
 using Negade.Application.Rfqs.Common;
+using Negade.Application.TradeTrust.Common;
 using Negade.Domain.Entities;
 
 namespace Negade.Application;
@@ -25,6 +26,8 @@ public static class DependencyInjection
         config.NewConfig<CreateQuoteDto, Quote>();
         config.NewConfig<Quote, QuoteDto>()
             .Map(destination => destination.SupplierName, source => source.Supplier.BusinessName);
+        config.NewConfig<TradeRating, TradeRatingDto>();
+        config.NewConfig<TradeHistory, TradeHistoryDto>();
 
         services.AddSingleton(config);
         services.AddScoped<IMapper, ServiceMapper>();

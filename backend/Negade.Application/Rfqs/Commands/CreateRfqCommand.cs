@@ -6,7 +6,7 @@ using Negade.Domain.Entities;
 
 namespace Negade.Application.Rfqs.Commands;
 
-public record CreateRfqCommand(CreateRfqDto Rfq) : IRequest<RfqDto>;
+public record CreateRfqCommand(CreateRfqDto Rfq, Guid? BuyerUserId) : IRequest<RfqDto>;
 
 public class CreateRfqCommandHandler(IApplicationDbContext dbContext, IMapper mapper)
     : IRequestHandler<CreateRfqCommand, RfqDto>
@@ -15,6 +15,7 @@ public class CreateRfqCommandHandler(IApplicationDbContext dbContext, IMapper ma
     {
         var rfq = mapper.Map<Rfq>(request.Rfq);
         rfq.Id = Guid.NewGuid();
+        rfq.BuyerUserId = request.BuyerUserId;
         rfq.Status = "Open";
         rfq.CreatedAt = DateTime.UtcNow;
 

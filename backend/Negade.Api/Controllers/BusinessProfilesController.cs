@@ -1,4 +1,6 @@
+using System.Security.Claims;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Negade.Application.BusinessProfiles.Commands;
 using Negade.Application.BusinessProfiles.Common;
@@ -24,12 +26,33 @@ public class BusinessProfilesController(IMediator mediator) : ControllerBase
         return Ok(profiles);
     }
 
+    [Authorize]
     [HttpPost]
     public async Task<ActionResult<BusinessProfileDto>> Create(
         [FromBody] CreateBusinessProfileDto request,
         CancellationToken cancellationToken)
     {
-        var created = await mediator.Send(new CreateBusinessProfileCommand(request), cancellationToken);
+        var created = await mediator.Send(new CreateBusinessProfileCommand(request, GetUserId()), cancellationToken);
         return CreatedAtAction(nameof(GetAll), new { id = created.Id }, created);
+    }
+
+    [Authorize]
+    [HttpPatch("{businessProfileId:guid}/verification")]
+    public async Task<ActionResult<BusinessProfileDto>> Verify(
+        Guid businessProfileId,
+        [FromBody] VerifyBusinessProfileDto request,
+        CancellationToken cancellationToken)
+    {
+        var updated = await mediator.Send(
+            new VerifyBusinessProfileCommand(businessProfileId, request),
+            cancellationToken);
+
+        return updated is null ? NotFound() : Ok(updated);
+    }
+
+    private Guid? GetUserId()
+    {
+        var id = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        return Guid.TryParse(id, out var userId) ? userId : null;
     }
 }

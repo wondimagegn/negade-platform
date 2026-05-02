@@ -2,6 +2,7 @@ namespace Negade.Application.Rfqs.Common;
 
 public record RfqDto(
     Guid Id,
+    Guid? BuyerUserId,
     string BuyerName,
     string BuyerPhoneNumber,
     string? BuyerBusinessName,

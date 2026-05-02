@@ -3,6 +3,7 @@ namespace Negade.Domain.Entities;
 public class Rfq
 {
     public Guid Id { get; set; }
+    public Guid? BuyerUserId { get; set; }
     public string BuyerName { get; set; } = string.Empty;
     public string BuyerPhoneNumber { get; set; } = string.Empty;
     public string? BuyerBusinessName { get; set; }
@@ -17,5 +18,6 @@ public class Rfq
     public int QuoteCount { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
+    public AppUser? BuyerUser { get; set; }
     public List<Quote> Quotes { get; set; } = [];
 }

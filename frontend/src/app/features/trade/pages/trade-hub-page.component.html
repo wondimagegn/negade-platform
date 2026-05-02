@@ -7,6 +7,32 @@
 </section>
 
 <p *ngIf="errorMessage" class="error">{{ errorMessage }}</p>
+<p *ngIf="successMessage" class="success">{{ successMessage }}</p>
+
+<section class="panel auth-panel">
+  <div>
+    <h2>{{ currentUser ? 'Signed In' : 'Trader Account' }}</h2>
+    <p class="empty" *ngIf="currentUser">{{ currentUser.fullName }} • {{ currentUser.phoneNumber }}</p>
+  </div>
+
+  <button *ngIf="currentUser" type="button" (click)="logout()">Logout</button>
+
+  <div class="auth-grid" *ngIf="!currentUser">
+    <form [formGroup]="loginForm" (ngSubmit)="login()" class="inline-auth">
+      <input type="tel" formControlName="phoneNumber" placeholder="Phone" />
+      <input type="password" formControlName="password" placeholder="Password" />
+      <button type="submit" [disabled]="authenticating">Login</button>
+    </form>
+
+    <form [formGroup]="registerForm" (ngSubmit)="register()" class="inline-auth">
+      <input type="text" formControlName="fullName" placeholder="Full name" />
+      <input type="tel" formControlName="phoneNumber" placeholder="Phone" />
+      <input type="email" formControlName="email" placeholder="Email" />
+      <input type="password" formControlName="password" placeholder="Password" />
+      <button type="submit" [disabled]="authenticating">Register</button>
+    </form>
+  </div>
+</section>
 
 <section class="metrics-grid">
   <article>
@@ -20,6 +46,10 @@
   <article>
     <strong>{{ rfqs.length }}</strong>
     <span>Open RFQs</span>
+  </article>
+  <article>
+    <strong>{{ quotes.length }}</strong>
+    <span>Quotes viewed</span>
   </article>
 </section>
 
@@ -167,6 +197,136 @@
 
 <section class="two-column">
   <article class="panel">
+    <h2>Submit Quote</h2>
+    <form [formGroup]="quoteForm" (ngSubmit)="createQuote()" class="form-stack">
+      <label>
+        RFQ
+        <select formControlName="rfqId" (change)="loadQuotes($any($event.target).value)">
+          <option value="">Select RFQ</option>
+          <option *ngFor="let rfq of rfqs" [value]="rfq.id">{{ rfq.productName }} • {{ rfq.deliveryRegion }}</option>
+        </select>
+      </label>
+      <label>
+        Supplier Profile
+        <select formControlName="supplierId">
+          <option value="">Select supplier</option>
+          <option *ngFor="let supplier of suppliers" [value]="supplier.id">{{ supplier.businessName }}</option>
+        </select>
+      </label>
+      <div class="inline-fields">
+        <label>
+          Unit Price
+          <input type="number" formControlName="unitPrice" min="0.01" step="0.01" />
+        </label>
+        <label>
+          Available Quantity
+          <input type="number" formControlName="quantityAvailable" min="0.01" step="0.01" />
+        </label>
+      </div>
+      <label>
+        Delivery Days
+        <input type="number" formControlName="deliveryTimeInDays" min="0" step="1" />
+      </label>
+      <label>
+        Notes
+        <textarea rows="3" formControlName="notes"></textarea>
+      </label>
+      <button type="submit" [disabled]="savingQuote || !currentUser">Submit Quote</button>
+    </form>
+  </article>
+
+  <article class="panel">
+    <h2>Quotes</h2>
+    <div class="list-row" *ngFor="let quote of quotes">
+      <div>
+        <strong>{{ quote.supplierName }}</strong>
+        <span>{{ quote.unitPrice | number:'1.2-2' }} ETB • {{ quote.quantityAvailable | number:'1.0-2' }} available • {{ quote.deliveryTimeInDays }} days</span>
+      </div>
+      <span class="pill">Quote</span>
+    </div>
+    <p *ngIf="quotes.length === 0" class="empty">Select an RFQ to view quotes.</p>
+  </article>
+</section>
+
+<section class="two-column">
+  <article class="panel">
+    <h2>Verification</h2>
+    <form [formGroup]="verificationForm" (ngSubmit)="verifySupplier()" class="form-stack">
+      <label>
+        Supplier
+        <select formControlName="supplierId">
+          <option value="">Select supplier</option>
+          <option *ngFor="let supplier of suppliers" [value]="supplier.id">{{ supplier.businessName }}</option>
+        </select>
+      </label>
+      <label>
+        Status
+        <select formControlName="verificationStatus">
+          <option value="Pending">Pending</option>
+          <option value="Verified">Verified</option>
+          <option value="Rejected">Rejected</option>
+        </select>
+      </label>
+      <button type="submit" [disabled]="savingTrust || !currentUser">Update Verification</button>
+    </form>
+  </article>
+
+  <article class="panel">
+    <h2>Ratings & Trade History</h2>
+    <form [formGroup]="ratingForm" (ngSubmit)="createRating()" class="form-stack trust-form">
+      <label>
+        Supplier
+        <select formControlName="supplierId">
+          <option value="">Select supplier</option>
+          <option *ngFor="let supplier of suppliers" [value]="supplier.id">{{ supplier.businessName }}</option>
+        </select>
+      </label>
+      <div class="inline-fields">
+        <label>
+          Rating
+          <input type="number" formControlName="score" min="1" max="5" step="1" />
+        </label>
+        <label>
+          Comment
+          <input type="text" formControlName="comment" />
+        </label>
+      </div>
+      <button type="submit" [disabled]="savingTrust || !currentUser">Add Rating</button>
+    </form>
+
+    <form [formGroup]="historyForm" (ngSubmit)="createTradeHistory()" class="form-stack trust-form">
+      <label>
+        Supplier
+        <select formControlName="supplierId">
+          <option value="">Select supplier</option>
+          <option *ngFor="let supplier of suppliers" [value]="supplier.id">{{ supplier.businessName }}</option>
+        </select>
+      </label>
+      <label>
+        Trade Description
+        <input type="text" formControlName="description" />
+      </label>
+      <div class="inline-fields">
+        <label>
+          Counterparty
+          <input type="text" formControlName="counterpartyName" />
+        </label>
+        <label>
+          Amount
+          <input type="number" formControlName="amount" min="0" step="0.01" />
+        </label>
+      </div>
+      <label>
+        Trade Date
+        <input type="date" formControlName="tradeDate" />
+      </label>
+      <button type="submit" [disabled]="savingTrust || !currentUser">Add Trade Record</button>
+    </form>
+  </article>
+</section>
+
+<section class="two-column">
+  <article class="panel">
     <h2>Recent RFQs</h2>
     <div class="list-row" *ngFor="let rfq of rfqs">
       <div>
@@ -183,7 +343,7 @@
     <div class="list-row" *ngFor="let supplier of suppliers">
       <div>
         <strong>{{ supplier.businessName }}</strong>
-        <span>{{ supplier.businessType }} • {{ supplier.region }} / {{ supplier.city }}</span>
+        <span>{{ supplier.businessType }} • {{ supplier.region }} / {{ supplier.city }} • {{ supplier.ratingAverage | number:'1.1-2' }} rating • {{ supplier.tradeCount }} trades</span>
       </div>
       <span class="pill">{{ supplier.verificationStatus }}</span>
     </div>

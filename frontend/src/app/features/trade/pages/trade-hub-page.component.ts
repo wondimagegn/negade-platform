@@ -2,7 +2,8 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { finalize, forkJoin } from 'rxjs';
-import { BusinessProfile, Product, Rfq } from '../data-access/trade.models';
+import { AuthResponse, AuthService } from '../data-access/auth.service';
+import { BusinessProfile, Product, Quote, Rfq } from '../data-access/trade.models';
 import { TradeService } from '../data-access/trade.service';
 
 @Component({
@@ -15,14 +16,33 @@ import { TradeService } from '../data-access/trade.service';
 export class TradeHubPageComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly tradeService = inject(TradeService);
+  private readonly authService = inject(AuthService);
 
   products: Product[] = [];
   suppliers: BusinessProfile[] = [];
   rfqs: Rfq[] = [];
+  quotes: Quote[] = [];
+  currentUser: AuthResponse | null = null;
   loading = false;
+  authenticating = false;
   savingRfq = false;
   savingSupplier = false;
+  savingQuote = false;
+  savingTrust = false;
   errorMessage = '';
+  successMessage = '';
+
+  readonly loginForm = this.fb.nonNullable.group({
+    phoneNumber: [''],
+    password: ['']
+  });
+
+  readonly registerForm = this.fb.nonNullable.group({
+    fullName: [''],
+    phoneNumber: [''],
+    email: [''],
+    password: ['']
+  });
 
   readonly searchForm = this.fb.nonNullable.group({
     search: [''],
@@ -54,8 +74,81 @@ export class TradeHubPageComponent implements OnInit {
     businessType: ['Supplier', [Validators.required, Validators.maxLength(100)]]
   });
 
+  readonly quoteForm = this.fb.nonNullable.group({
+    rfqId: [''],
+    supplierId: [''],
+    unitPrice: [0, [Validators.required, Validators.min(0.01)]],
+    quantityAvailable: [1, [Validators.required, Validators.min(0.01)]],
+    deliveryTimeInDays: [1, [Validators.required, Validators.min(0)]],
+    notes: ['']
+  });
+
+  readonly verificationForm = this.fb.nonNullable.group({
+    supplierId: [''],
+    verificationStatus: ['Verified']
+  });
+
+  readonly ratingForm = this.fb.nonNullable.group({
+    supplierId: [''],
+    score: [5, [Validators.required, Validators.min(1), Validators.max(5)]],
+    comment: ['']
+  });
+
+  readonly historyForm = this.fb.nonNullable.group({
+    supplierId: [''],
+    description: [''],
+    counterpartyName: [''],
+    amount: [0],
+    tradeDate: [new Date().toISOString().slice(0, 10)]
+  });
+
   ngOnInit(): void {
+    this.currentUser = this.authService.currentUser;
+    this.authService.currentUser$.subscribe((user) => (this.currentUser = user));
     this.loadDashboard();
+  }
+
+  register(): void {
+    if (this.authenticating) {
+      return;
+    }
+
+    this.authenticating = true;
+    this.errorMessage = '';
+    this.authService
+      .register(this.registerForm.getRawValue())
+      .pipe(finalize(() => (this.authenticating = false)))
+      .subscribe({
+        next: () => {
+          this.successMessage = 'Account created.';
+          this.registerForm.reset({ fullName: '', phoneNumber: '', email: '', password: '' });
+        },
+        error: () => (this.errorMessage = 'Could not register this account.')
+      });
+  }
+
+  login(): void {
+    if (this.authenticating) {
+      return;
+    }
+
+    this.authenticating = true;
+    this.errorMessage = '';
+    this.authService
+      .login(this.loginForm.getRawValue())
+      .pipe(finalize(() => (this.authenticating = false)))
+      .subscribe({
+        next: () => {
+          this.successMessage = 'Signed in.';
+          this.loginForm.reset({ phoneNumber: '', password: '' });
+        },
+        error: () => (this.errorMessage = 'Invalid phone number or password.')
+      });
+  }
+
+  logout(): void {
+    this.authService.logout();
+    this.successMessage = 'Signed out.';
   }
 
   loadDashboard(): void {
@@ -73,6 +166,7 @@ export class TradeHubPageComponent implements OnInit {
           this.products = products;
           this.suppliers = suppliers;
           this.rfqs = rfqs;
+          this.setDefaultSelections();
         },
         error: () => (this.errorMessage = 'Could not load trade data.')
       });
@@ -104,6 +198,7 @@ export class TradeHubPageComponent implements OnInit {
       .subscribe({
         next: (rfq) => {
           this.rfqs = [rfq, ...this.rfqs];
+          this.quoteForm.patchValue({ rfqId: rfq.id });
           this.rfqForm.reset({
             buyerName: '',
             buyerPhoneNumber: '',
@@ -134,6 +229,7 @@ export class TradeHubPageComponent implements OnInit {
       .subscribe({
         next: (supplier) => {
           this.suppliers = [supplier, ...this.suppliers];
+          this.setDefaultSelections();
           this.supplierForm.reset({
             businessName: '',
             ownerName: '',
@@ -147,5 +243,122 @@ export class TradeHubPageComponent implements OnInit {
         },
         error: () => (this.errorMessage = 'Could not create supplier profile.')
       });
+  }
+
+  loadQuotes(rfqId: string): void {
+    if (!rfqId) {
+      this.quotes = [];
+      return;
+    }
+
+    this.tradeService.getQuotes(rfqId).subscribe({
+      next: (quotes) => (this.quotes = quotes),
+      error: () => (this.errorMessage = 'Could not load quotes for this RFQ.')
+    });
+  }
+
+  createQuote(): void {
+    if (this.quoteForm.invalid || this.savingQuote) {
+      this.quoteForm.markAllAsTouched();
+      return;
+    }
+
+    const { rfqId, ...payload } = this.quoteForm.getRawValue();
+    if (!rfqId || !payload.supplierId) {
+      this.errorMessage = 'Choose an RFQ and supplier before submitting a quote.';
+      return;
+    }
+
+    this.savingQuote = true;
+    this.tradeService
+      .createQuote(rfqId, payload)
+      .pipe(finalize(() => (this.savingQuote = false)))
+      .subscribe({
+        next: (quote) => {
+          this.quotes = [quote, ...this.quotes];
+          this.loadDashboard();
+        },
+        error: () => (this.errorMessage = 'Could not submit the quote. Make sure you own the supplier profile.')
+      });
+  }
+
+  verifySupplier(): void {
+    const { supplierId, verificationStatus } = this.verificationForm.getRawValue();
+    if (!supplierId || this.savingTrust) {
+      this.errorMessage = 'Choose a supplier to verify.';
+      return;
+    }
+
+    this.savingTrust = true;
+    this.tradeService
+      .verifyBusinessProfile(supplierId, verificationStatus)
+      .pipe(finalize(() => (this.savingTrust = false)))
+      .subscribe({
+        next: (supplier) => {
+          this.suppliers = this.suppliers.map((item) => (item.id === supplier.id ? supplier : item));
+          this.successMessage = 'Verification updated.';
+        },
+        error: () => (this.errorMessage = 'Could not update verification status.')
+      });
+  }
+
+  createRating(): void {
+    const { supplierId, ...payload } = this.ratingForm.getRawValue();
+    if (!supplierId || this.ratingForm.invalid || this.savingTrust) {
+      this.ratingForm.markAllAsTouched();
+      return;
+    }
+
+    this.savingTrust = true;
+    this.tradeService
+      .createRating(supplierId, payload)
+      .pipe(finalize(() => (this.savingTrust = false)))
+      .subscribe({
+        next: () => {
+          this.successMessage = 'Rating added.';
+          this.loadDashboard();
+        },
+        error: () => (this.errorMessage = 'Could not add rating.')
+      });
+  }
+
+  createTradeHistory(): void {
+    const { supplierId, ...rawPayload } = this.historyForm.getRawValue();
+    if (!supplierId || !rawPayload.description || this.savingTrust) {
+      this.historyForm.markAllAsTouched();
+      return;
+    }
+
+    this.savingTrust = true;
+    this.tradeService
+      .createTradeHistory(supplierId, {
+        ...rawPayload,
+        amount: rawPayload.amount || null,
+        tradeDate: new Date(rawPayload.tradeDate).toISOString()
+      })
+      .pipe(finalize(() => (this.savingTrust = false)))
+      .subscribe({
+        next: () => {
+          this.successMessage = 'Trade history added.';
+          this.loadDashboard();
+        },
+        error: () => (this.errorMessage = 'Could not add trade history. Make sure you own the supplier profile.')
+      });
+  }
+
+  private setDefaultSelections(): void {
+    const firstSupplierId = this.suppliers[0]?.id ?? '';
+    const firstRfqId = this.rfqs[0]?.id ?? '';
+    this.quoteForm.patchValue({
+      supplierId: this.quoteForm.value.supplierId || firstSupplierId,
+      rfqId: this.quoteForm.value.rfqId || firstRfqId
+    });
+    this.verificationForm.patchValue({ supplierId: this.verificationForm.value.supplierId || firstSupplierId });
+    this.ratingForm.patchValue({ supplierId: this.ratingForm.value.supplierId || firstSupplierId });
+    this.historyForm.patchValue({ supplierId: this.historyForm.value.supplierId || firstSupplierId });
+
+    if (firstRfqId && this.quotes.length === 0) {
+      this.loadQuotes(firstRfqId);
+    }
   }
 }

@@ -4,6 +4,7 @@ public record QuoteDto(
     Guid Id,
     Guid RfqId,
     Guid SupplierId,
+    Guid? SupplierUserId,
     string SupplierName,
     decimal UnitPrice,
     decimal QuantityAvailable,

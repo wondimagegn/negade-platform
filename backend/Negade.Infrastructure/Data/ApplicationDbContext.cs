@@ -7,18 +7,46 @@ namespace Negade.Infrastructure.Data;
 public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
     : DbContext(options), IApplicationDbContext
 {
+    public DbSet<AppUser> AppUsers => Set<AppUser>();
     public DbSet<BusinessProfile> BusinessProfiles => Set<BusinessProfile>();
     public DbSet<Product> Products => Set<Product>();
     public DbSet<Rfq> Rfqs => Set<Rfq>();
     public DbSet<Quote> Quotes => Set<Quote>();
+    public DbSet<TradeRating> TradeRatings => Set<TradeRating>();
+    public DbSet<TradeHistory> TradeHistory => Set<TradeHistory>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
 
+        modelBuilder.Entity<AppUser>(entity =>
+        {
+            entity.HasKey(u => u.Id);
+            entity.Property(u => u.FullName)
+                .IsRequired()
+                .HasMaxLength(200);
+            entity.Property(u => u.PhoneNumber)
+                .IsRequired()
+                .HasMaxLength(100);
+            entity.Property(u => u.Email)
+                .HasMaxLength(200);
+            entity.Property(u => u.PasswordHash)
+                .IsRequired()
+                .HasMaxLength(500);
+            entity.Property(u => u.Role)
+                .IsRequired()
+                .HasMaxLength(50);
+            entity.HasIndex(u => u.PhoneNumber)
+                .IsUnique();
+        });
+
         modelBuilder.Entity<BusinessProfile>(entity =>
         {
             entity.HasKey(p => p.Id);
+            entity.HasOne(p => p.OwnerUser)
+                .WithMany(u => u.BusinessProfiles)
+                .HasForeignKey(p => p.OwnerUserId)
+                .OnDelete(DeleteBehavior.SetNull);
             entity.Property(p => p.BusinessName)
                 .IsRequired()
                 .HasMaxLength(200);
@@ -48,6 +76,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
                 .HasPrecision(3, 2);
             entity.HasIndex(p => p.TinNumber);
             entity.HasIndex(p => new { p.Region, p.City });
+            entity.HasIndex(p => p.OwnerUserId);
         });
 
         modelBuilder.Entity<Product>(entity =>
@@ -89,6 +118,10 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         modelBuilder.Entity<Rfq>(entity =>
         {
             entity.HasKey(r => r.Id);
+            entity.HasOne(r => r.BuyerUser)
+                .WithMany()
+                .HasForeignKey(r => r.BuyerUserId)
+                .OnDelete(DeleteBehavior.SetNull);
             entity.Property(r => r.BuyerName)
                 .IsRequired()
                 .HasMaxLength(200);
@@ -121,6 +154,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
                 .HasMaxLength(50);
             entity.HasIndex(r => r.Status);
             entity.HasIndex(r => new { r.Category, r.DeliveryRegion });
+            entity.HasIndex(r => r.BuyerUserId);
         });
 
         modelBuilder.Entity<Quote>(entity =>
@@ -134,12 +168,51 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
                 .WithMany(s => s.Quotes)
                 .HasForeignKey(q => q.SupplierId)
                 .OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(q => q.SupplierUser)
+                .WithMany()
+                .HasForeignKey(q => q.SupplierUserId)
+                .OnDelete(DeleteBehavior.SetNull);
             entity.Property(q => q.UnitPrice)
                 .HasPrecision(18, 2);
             entity.Property(q => q.QuantityAvailable)
                 .HasPrecision(18, 2);
             entity.Property(q => q.Notes)
                 .HasMaxLength(2000);
+            entity.HasIndex(q => q.SupplierUserId);
+        });
+
+        modelBuilder.Entity<TradeRating>(entity =>
+        {
+            entity.HasKey(r => r.Id);
+            entity.HasOne(r => r.Supplier)
+                .WithMany(s => s.Ratings)
+                .HasForeignKey(r => r.SupplierId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(r => r.RaterUser)
+                .WithMany()
+                .HasForeignKey(r => r.RaterUserId)
+                .OnDelete(DeleteBehavior.SetNull);
+            entity.Property(r => r.Comment)
+                .HasMaxLength(1000);
+            entity.HasIndex(r => r.SupplierId);
+            entity.HasIndex(r => r.RaterUserId);
+        });
+
+        modelBuilder.Entity<TradeHistory>(entity =>
+        {
+            entity.HasKey(h => h.Id);
+            entity.HasOne(h => h.BusinessProfile)
+                .WithMany(p => p.TradeHistory)
+                .HasForeignKey(h => h.BusinessProfileId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.Property(h => h.Description)
+                .IsRequired()
+                .HasMaxLength(500);
+            entity.Property(h => h.CounterpartyName)
+                .HasMaxLength(200);
+            entity.Property(h => h.Amount)
+                .HasPrecision(18, 2);
+            entity.HasIndex(h => h.BusinessProfileId);
         });
     }
 }

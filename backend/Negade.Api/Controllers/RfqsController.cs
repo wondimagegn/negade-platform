@@ -1,4 +1,6 @@
+using System.Security.Claims;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Negade.Application.Rfqs.Commands;
 using Negade.Application.Rfqs.Common;
@@ -21,12 +23,13 @@ public class RfqsController(IMediator mediator) : ControllerBase
         return Ok(rfqs);
     }
 
+    [Authorize]
     [HttpPost]
     public async Task<ActionResult<RfqDto>> Create(
         [FromBody] CreateRfqDto request,
         CancellationToken cancellationToken)
     {
-        var created = await mediator.Send(new CreateRfqCommand(request), cancellationToken);
+        var created = await mediator.Send(new CreateRfqCommand(request, GetUserId()), cancellationToken);
         return CreatedAtAction(nameof(GetAll), new { id = created.Id }, created);
     }
 
@@ -39,13 +42,20 @@ public class RfqsController(IMediator mediator) : ControllerBase
         return Ok(quotes);
     }
 
+    [Authorize]
     [HttpPost("{rfqId:guid}/quotes")]
     public async Task<ActionResult<QuoteDto>> CreateQuote(
         Guid rfqId,
         [FromBody] CreateQuoteDto request,
         CancellationToken cancellationToken)
     {
-        var created = await mediator.Send(new CreateQuoteCommand(rfqId, request), cancellationToken);
+        var created = await mediator.Send(new CreateQuoteCommand(rfqId, request, GetUserId()), cancellationToken);
         return created is null ? NotFound() : CreatedAtAction(nameof(GetQuotes), new { rfqId }, created);
+    }
+
+    private Guid? GetUserId()
+    {
+        var id = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        return Guid.TryParse(id, out var userId) ? userId : null;
     }
 }

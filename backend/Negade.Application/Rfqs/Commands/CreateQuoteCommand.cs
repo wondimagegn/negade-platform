@@ -7,7 +7,7 @@ using Negade.Domain.Entities;
 
 namespace Negade.Application.Rfqs.Commands;
 
-public record CreateQuoteCommand(Guid RfqId, CreateQuoteDto Quote) : IRequest<QuoteDto?>;
+public record CreateQuoteCommand(Guid RfqId, CreateQuoteDto Quote, Guid? SupplierUserId) : IRequest<QuoteDto?>;
 
 public class CreateQuoteCommandHandler(IApplicationDbContext dbContext, IMapper mapper)
     : IRequestHandler<CreateQuoteCommand, QuoteDto?>
@@ -24,9 +24,15 @@ public class CreateQuoteCommandHandler(IApplicationDbContext dbContext, IMapper 
             return null;
         }
 
+        if (request.SupplierUserId is not null && supplier.OwnerUserId != request.SupplierUserId)
+        {
+            return null;
+        }
+
         var quote = mapper.Map<Quote>(request.Quote);
         quote.Id = Guid.NewGuid();
         quote.RfqId = request.RfqId;
+        quote.SupplierUserId = request.SupplierUserId;
         quote.CreatedAt = DateTime.UtcNow;
 
         rfq.QuoteCount += 1;

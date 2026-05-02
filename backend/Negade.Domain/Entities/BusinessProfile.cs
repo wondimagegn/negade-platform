@@ -3,6 +3,7 @@ namespace Negade.Domain.Entities;
 public class BusinessProfile
 {
     public Guid Id { get; set; }
+    public Guid? OwnerUserId { get; set; }
     public string BusinessName { get; set; } = string.Empty;
     public string OwnerName { get; set; } = string.Empty;
     public string TinNumber { get; set; } = string.Empty;
@@ -17,6 +18,9 @@ public class BusinessProfile
     public int TradeCount { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
+    public AppUser? OwnerUser { get; set; }
     public List<Product> Products { get; set; } = [];
     public List<Quote> Quotes { get; set; } = [];
+    public List<TradeRating> Ratings { get; set; } = [];
+    public List<TradeHistory> TradeHistory { get; set; } = [];
 }
