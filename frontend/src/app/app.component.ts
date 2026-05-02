@@ -10,8 +10,7 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
       <h1>Negade Frontend</h1>
 
       <nav class="top-nav">
-        <a routerLink="" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Home</a>
-        <a routerLink="/products" routerLinkActive="active">Products</a>
+        <a routerLink="" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Products</a>
       </nav>
 
       <router-outlet />
