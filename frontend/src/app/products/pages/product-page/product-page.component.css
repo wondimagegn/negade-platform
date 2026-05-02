@@ -17,6 +17,16 @@ textarea {
   border-radius: 0.5rem;
 }
 
+.checkbox-row {
+  align-items: center;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.checkbox-row input {
+  width: auto;
+}
+
 .row {
   display: grid;
   gap: 0.75rem;

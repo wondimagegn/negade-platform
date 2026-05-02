@@ -7,26 +7,139 @@ namespace Negade.Infrastructure.Data;
 public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
     : DbContext(options), IApplicationDbContext
 {
+    public DbSet<BusinessProfile> BusinessProfiles => Set<BusinessProfile>();
     public DbSet<Product> Products => Set<Product>();
+    public DbSet<Rfq> Rfqs => Set<Rfq>();
+    public DbSet<Quote> Quotes => Set<Quote>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
 
+        modelBuilder.Entity<BusinessProfile>(entity =>
+        {
+            entity.HasKey(p => p.Id);
+            entity.Property(p => p.BusinessName)
+                .IsRequired()
+                .HasMaxLength(200);
+            entity.Property(p => p.OwnerName)
+                .IsRequired()
+                .HasMaxLength(200);
+            entity.Property(p => p.TinNumber)
+                .HasMaxLength(50);
+            entity.Property(p => p.PhoneNumber)
+                .IsRequired()
+                .HasMaxLength(50);
+            entity.Property(p => p.Region)
+                .IsRequired()
+                .HasMaxLength(100);
+            entity.Property(p => p.City)
+                .IsRequired()
+                .HasMaxLength(100);
+            entity.Property(p => p.Address)
+                .HasMaxLength(500);
+            entity.Property(p => p.BusinessType)
+                .IsRequired()
+                .HasMaxLength(100);
+            entity.Property(p => p.VerificationStatus)
+                .IsRequired()
+                .HasMaxLength(50);
+            entity.Property(p => p.RatingAverage)
+                .HasPrecision(3, 2);
+            entity.HasIndex(p => p.TinNumber);
+            entity.HasIndex(p => new { p.Region, p.City });
+        });
+
         modelBuilder.Entity<Product>(entity =>
         {
             entity.HasKey(p => p.Id);
+            entity.HasOne(p => p.Supplier)
+                .WithMany(s => s.Products)
+                .HasForeignKey(p => p.SupplierId)
+                .OnDelete(DeleteBehavior.SetNull);
             entity.Property(p => p.Name)
                 .IsRequired()
                 .HasMaxLength(200);
             entity.Property(p => p.Description)
                 .HasMaxLength(2000);
+            entity.Property(p => p.Category)
+                .IsRequired()
+                .HasMaxLength(100);
             entity.Property(p => p.Price)
                 .HasPrecision(18, 2);
+            entity.Property(p => p.Unit)
+                .IsRequired()
+                .HasMaxLength(50);
             entity.Property(p => p.StockQuantity)
                 .IsRequired();
+            entity.Property(p => p.AvailableQuantity)
+                .HasPrecision(18, 2);
+            entity.Property(p => p.Region)
+                .HasMaxLength(100);
+            entity.Property(p => p.City)
+                .HasMaxLength(100);
             entity.Property(p => p.CreatedAt)
                 .IsRequired();
+            entity.HasIndex(p => p.Name);
+            entity.HasIndex(p => p.Category);
+            entity.HasIndex(p => new { p.Region, p.City });
+            entity.HasIndex(p => p.IsAvailable);
+        });
+
+        modelBuilder.Entity<Rfq>(entity =>
+        {
+            entity.HasKey(r => r.Id);
+            entity.Property(r => r.BuyerName)
+                .IsRequired()
+                .HasMaxLength(200);
+            entity.Property(r => r.BuyerPhoneNumber)
+                .IsRequired()
+                .HasMaxLength(50);
+            entity.Property(r => r.BuyerBusinessName)
+                .HasMaxLength(200);
+            entity.Property(r => r.ProductName)
+                .IsRequired()
+                .HasMaxLength(200);
+            entity.Property(r => r.Category)
+                .IsRequired()
+                .HasMaxLength(100);
+            entity.Property(r => r.Quantity)
+                .HasPrecision(18, 2);
+            entity.Property(r => r.Unit)
+                .IsRequired()
+                .HasMaxLength(50);
+            entity.Property(r => r.DeliveryRegion)
+                .IsRequired()
+                .HasMaxLength(100);
+            entity.Property(r => r.DeliveryCity)
+                .IsRequired()
+                .HasMaxLength(100);
+            entity.Property(r => r.Notes)
+                .HasMaxLength(2000);
+            entity.Property(r => r.Status)
+                .IsRequired()
+                .HasMaxLength(50);
+            entity.HasIndex(r => r.Status);
+            entity.HasIndex(r => new { r.Category, r.DeliveryRegion });
+        });
+
+        modelBuilder.Entity<Quote>(entity =>
+        {
+            entity.HasKey(q => q.Id);
+            entity.HasOne(q => q.Rfq)
+                .WithMany(r => r.Quotes)
+                .HasForeignKey(q => q.RfqId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(q => q.Supplier)
+                .WithMany(s => s.Quotes)
+                .HasForeignKey(q => q.SupplierId)
+                .OnDelete(DeleteBehavior.Restrict);
+            entity.Property(q => q.UnitPrice)
+                .HasPrecision(18, 2);
+            entity.Property(q => q.QuantityAvailable)
+                .HasPrecision(18, 2);
+            entity.Property(q => q.Notes)
+                .HasMaxLength(2000);
         });
     }
 }
