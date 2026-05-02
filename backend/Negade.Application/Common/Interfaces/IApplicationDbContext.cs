@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Negade.Domain.Entities;
 
-namespace Negade.Application.Abstractions;
+namespace Negade.Application.Common.Interfaces;
 
 public interface IApplicationDbContext
 {

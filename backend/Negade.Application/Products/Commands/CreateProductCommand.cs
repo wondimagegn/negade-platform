@@ -1,7 +1,7 @@
 using MapsterMapper;
 using MediatR;
-using Negade.Application.Abstractions;
-using Negade.Application.DTOs;
+using Negade.Application.Common.Interfaces;
+using Negade.Application.Products.Common;
 using Negade.Domain.Entities;
 
 namespace Negade.Application.Products.Commands;

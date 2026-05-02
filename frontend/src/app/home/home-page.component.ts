@@ -3,6 +3,7 @@ import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-home-page',
+  standalone: true,
   imports: [RouterLink],
   template: `
     <section class="card">

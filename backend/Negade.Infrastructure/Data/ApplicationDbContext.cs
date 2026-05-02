@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using Negade.Application.Abstractions;
+using Negade.Application.Common.Interfaces;
 using Negade.Domain.Entities;
 
 namespace Negade.Infrastructure.Data;

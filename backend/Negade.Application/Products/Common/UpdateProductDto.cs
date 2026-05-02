@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Negade.Application.DTOs;
+namespace Negade.Application.Products.Common;
 
 public class UpdateProductDto
 {

@@ -1,8 +1,8 @@
 using MapsterMapper;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Negade.Application.Abstractions;
-using Negade.Application.DTOs;
+using Negade.Application.Common.Interfaces;
+using Negade.Application.Products.Common;
 
 namespace Negade.Application.Products.Commands;
 
