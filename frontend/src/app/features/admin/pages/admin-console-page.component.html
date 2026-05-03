@@ -1,0 +1,465 @@
+<div class="admin-shell">
+  <aside class="sidebar">
+    <div class="brand">
+      <span class="material-symbol">admin_panel_settings</span>
+      <div>
+        <strong>Negade Admin</strong>
+        <small>Operations console</small>
+      </div>
+    </div>
+
+    <button
+      *ngFor="let section of sections"
+      type="button"
+      class="nav-item"
+      [class.active]="activeSection === section.id"
+      (click)="activate(section.id)"
+    >
+      <span class="material-symbol">{{ section.icon }}</span>
+      {{ section.label }}
+    </button>
+  </aside>
+
+  <section class="console">
+    <header class="toolbar">
+      <div>
+        <p>AdminLTE Material</p>
+        <h1>Trade operations management</h1>
+      </div>
+      <div class="toolbar-actions">
+        <button type="button" class="ghost" (click)="activate('verification')">
+          <span class="material-symbol">fact_check</span>
+          Review Suppliers
+        </button>
+        <button type="button" class="primary" (click)="loadAll()" [disabled]="loading">
+          <span class="material-symbol">refresh</span>
+          Refresh
+        </button>
+      </div>
+    </header>
+
+    <p *ngIf="errorMessage" class="notice error">{{ errorMessage }}</p>
+    <p *ngIf="successMessage" class="notice success">{{ successMessage }}</p>
+
+    <section class="metric-grid">
+      <article class="metric urgent">
+        <span class="material-symbol">pending_actions</span>
+        <strong>{{ pendingProfiles.length }}</strong>
+        <small>Suppliers to verify</small>
+      </article>
+      <article class="metric">
+        <span class="material-symbol">verified</span>
+        <strong>{{ verifiedProfiles.length }}</strong>
+        <small>Verified suppliers</small>
+      </article>
+      <article class="metric">
+        <span class="material-symbol">star</span>
+        <strong>{{ ratingAverage | number:'1.1-1' }}</strong>
+        <small>Average rating</small>
+      </article>
+      <article class="metric">
+        <span class="material-symbol">storefront</span>
+        <strong>{{ liveProducts.length }}</strong>
+        <small>Live products</small>
+      </article>
+      <article class="metric">
+        <span class="material-symbol">request_quote</span>
+        <strong>{{ openRfqs.length }}</strong>
+        <small>Active RFQs</small>
+      </article>
+    </section>
+
+    <section *ngIf="activeSection === 'overview'" class="dashboard-grid">
+      <article class="panel hero-panel">
+        <div>
+          <p>Priority Queue</p>
+          <h2>{{ pendingProfiles.length }} supplier profiles need verification</h2>
+          <span>Review documents, profile quality, marketplace readiness, and trust signals from one place.</span>
+        </div>
+        <button type="button" class="primary" (click)="activate('verification')">Open Queue</button>
+      </article>
+
+      <article class="panel">
+        <div class="panel-title">
+          <h2>Supplier Verification</h2>
+          <button type="button" class="text-button" (click)="activate('verification')">View all</button>
+        </div>
+        <div class="compact-list">
+          <button type="button" *ngFor="let profile of pendingProfiles.slice(0, 5)" (click)="selectProfile(profile); activate('verification')">
+            <span>
+              <strong>{{ profile.businessName }}</strong>
+              <small>{{ profile.businessType }} in {{ profile.region }} / {{ profile.city }}</small>
+            </span>
+            <span class="status warning">{{ profile.verificationStatus }}</span>
+          </button>
+          <p *ngIf="pendingProfiles.length === 0" class="empty">No pending supplier reviews.</p>
+        </div>
+      </article>
+
+      <article class="panel">
+        <div class="panel-title">
+          <h2>Rating Health</h2>
+          <button type="button" class="text-button" (click)="activate('ratings')">Report</button>
+        </div>
+        <div class="compact-list">
+          <button type="button" *ngFor="let profile of attentionProfiles" (click)="selectProfile(profile); activate('ratings')">
+            <span>
+              <strong>{{ profile.businessName }}</strong>
+              <small>{{ profile.ratingCount }} ratings, {{ profile.tradeCount }} trades</small>
+            </span>
+            <span class="score" [class.low]="profile.ratingAverage < 3.5">{{ profile.ratingAverage | number:'1.1-1' }}</span>
+          </button>
+        </div>
+      </article>
+
+      <article class="panel">
+        <div class="panel-title">
+          <h2>Marketplace Activity</h2>
+          <button type="button" class="text-button" (click)="activate('trade')">Manage</button>
+        </div>
+        <div class="activity-strip">
+          <div>
+            <strong>{{ products.length }}</strong>
+            <span>Total products</span>
+          </div>
+          <div>
+            <strong>{{ rfqs.length }}</strong>
+            <span>Total RFQs</span>
+          </div>
+          <div>
+            <strong>{{ categories.length }}</strong>
+            <span>Categories</span>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <section *ngIf="activeSection === 'verification'" class="workspace-grid">
+      <article class="panel queue-panel">
+        <div class="panel-title">
+          <h2>Supplier Verification Queue</h2>
+          <span>{{ pendingProfiles.length }} open</span>
+        </div>
+        <div class="profile-queue">
+          <button
+            type="button"
+            *ngFor="let profile of pendingProfiles"
+            [class.active]="selectedProfileId === profile.id"
+            (click)="selectProfile(profile)"
+          >
+            <span>
+              <strong>{{ profile.businessName }}</strong>
+              <small>{{ profile.ownerName }} - {{ profile.region }} / {{ profile.city }}</small>
+            </span>
+            <span class="status warning">{{ profile.verificationStatus }}</span>
+          </button>
+          <p *ngIf="pendingProfiles.length === 0" class="empty">All supplier profiles are verified or closed.</p>
+        </div>
+      </article>
+
+      <article class="panel detail-panel">
+        <ng-container *ngIf="selectedProfile as profile; else noProfile">
+          <div class="profile-header">
+            <div>
+              <h2>{{ profile.businessName }}</h2>
+              <span>{{ profile.businessType }} - {{ profile.ownerName }}</span>
+            </div>
+            <span class="status" [class.warning]="profile.verificationStatus === 'Pending'" [class.rejected]="profile.verificationStatus === 'Rejected'">
+              {{ profile.verificationStatus }}
+            </span>
+          </div>
+          <div class="detail-grid">
+            <div><span>TIN</span><strong>{{ profile.tinNumber || 'Not provided' }}</strong></div>
+            <div><span>Phone</span><strong>{{ profile.phoneNumber }}</strong></div>
+            <div><span>Location</span><strong>{{ profile.region }} / {{ profile.city }}</strong></div>
+            <div><span>Trust</span><strong>{{ profile.ratingAverage | number:'1.1-1' }} rating, {{ profile.tradeCount }} trades</strong></div>
+          </div>
+          <form [formGroup]="verificationForm" (ngSubmit)="verifyProfile()" class="action-bar">
+            <input type="hidden" formControlName="supplierId" />
+            <select formControlName="verificationStatus">
+              <option value="Pending">Pending</option>
+              <option value="Verified">Verified</option>
+              <option value="Rejected">Rejected</option>
+            </select>
+            <button type="submit" class="primary" [disabled]="saving">Apply Decision</button>
+            <button type="button" class="ghost" (click)="editProfile(profile); activate('profiles')">Edit Profile</button>
+          </form>
+        </ng-container>
+        <ng-template #noProfile>
+          <p class="empty">Select a supplier from the queue.</p>
+        </ng-template>
+      </article>
+    </section>
+
+    <section *ngIf="activeSection === 'profiles'" class="workspace-grid">
+      <article class="panel">
+        <div class="panel-title">
+          <h2>Manage Business Profile</h2>
+          <button type="button" class="ghost" (click)="resetProfileForm()">Clear</button>
+        </div>
+        <form [formGroup]="profileForm" (ngSubmit)="saveProfile()" class="form-stack">
+          <label>Business Name <input type="text" formControlName="businessName" /></label>
+          <label>Owner Name <input type="text" formControlName="ownerName" /></label>
+          <div class="inline-fields">
+            <label>TIN <input type="text" formControlName="tinNumber" /></label>
+            <label>Phone <input type="tel" formControlName="phoneNumber" /></label>
+          </div>
+          <div class="inline-fields">
+            <label>Region
+              <select formControlName="region">
+                <option *ngFor="let region of regions" [value]="region.name">{{ region.name }}</option>
+              </select>
+            </label>
+            <label>City <input type="text" formControlName="city" /></label>
+          </div>
+          <label>Address <input type="text" formControlName="address" /></label>
+          <label>Business Type <input type="text" formControlName="businessType" /></label>
+          <button type="submit" class="primary" [disabled]="saving || !editingProfileId">
+            {{ editingProfileId ? 'Save Profile' : 'Select a profile to edit' }}
+          </button>
+        </form>
+      </article>
+
+      <article class="panel wide">
+        <div class="panel-title">
+          <h2>Business Profile Directory</h2>
+          <span>{{ profiles.length }} profiles</span>
+        </div>
+        <div class="profile-table">
+          <div class="profile-row" *ngFor="let profile of profiles">
+            <div>
+              <strong>{{ profile.businessName }}</strong>
+              <small>{{ profile.ownerName }} - {{ profile.businessType }}</small>
+            </div>
+            <span>{{ profile.region }} / {{ profile.city }}</span>
+            <span class="status" [class.warning]="profile.verificationStatus === 'Pending'" [class.rejected]="profile.verificationStatus === 'Rejected'">
+              {{ profile.verificationStatus }}
+            </span>
+            <span>{{ profile.ratingAverage | number:'1.1-1' }} rating</span>
+            <button type="button" class="icon" (click)="editProfile(profile)">
+              <span class="material-symbol">edit</span>
+            </button>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <section *ngIf="activeSection === 'ratings'" class="dashboard-grid">
+      <article class="panel report-card">
+        <h2>Rating Report</h2>
+        <div class="report-score">{{ ratingAverage | number:'1.1-1' }}</div>
+        <span>Average supplier rating across rated profiles</span>
+      </article>
+
+      <article class="panel wide">
+        <div class="panel-title">
+          <h2>Top Rated Suppliers</h2>
+          <span>{{ topRatedProfiles.length }} shown</span>
+        </div>
+        <div class="profile-table">
+          <div class="profile-row" *ngFor="let profile of topRatedProfiles">
+            <div>
+              <strong>{{ profile.businessName }}</strong>
+              <small>{{ profile.ratingCount }} ratings - {{ profile.tradeCount }} trades</small>
+            </div>
+            <span>{{ profile.region }}</span>
+            <span class="score">{{ profile.ratingAverage | number:'1.1-1' }}</span>
+            <button type="button" class="ghost" (click)="selectProfile(profile)">Inspect</button>
+          </div>
+        </div>
+      </article>
+
+      <article class="panel">
+        <h2>Add Rating</h2>
+        <form [formGroup]="ratingForm" (ngSubmit)="createRating()" class="form-stack">
+          <label>Supplier
+            <select formControlName="supplierId">
+              <option *ngFor="let profile of profiles" [value]="profile.id">{{ profile.businessName }}</option>
+            </select>
+          </label>
+          <div class="inline-fields">
+            <label>Score <input type="number" formControlName="score" min="1" max="5" /></label>
+            <label>Comment <input type="text" formControlName="comment" /></label>
+          </div>
+          <button type="submit" class="primary" [disabled]="saving">Add Rating</button>
+        </form>
+      </article>
+
+      <article class="panel">
+        <h2>Add Trade Record</h2>
+        <form [formGroup]="historyForm" (ngSubmit)="createHistory()" class="form-stack">
+          <label>Supplier
+            <select formControlName="supplierId">
+              <option *ngFor="let profile of profiles" [value]="profile.id">{{ profile.businessName }}</option>
+            </select>
+          </label>
+          <label>Description <input type="text" formControlName="description" /></label>
+          <div class="inline-fields">
+            <label>Counterparty <input type="text" formControlName="counterpartyName" /></label>
+            <label>Amount <input type="number" formControlName="amount" min="0" step="0.01" /></label>
+          </div>
+          <label>Trade Date <input type="date" formControlName="tradeDate" /></label>
+          <button type="submit" class="primary" [disabled]="saving">Add Record</button>
+        </form>
+      </article>
+    </section>
+
+    <section *ngIf="activeSection === 'trade'" class="workspace-grid">
+      <article class="panel">
+        <h2>{{ editingProductId ? 'Edit Product' : 'Add Marketplace Product' }}</h2>
+        <form [formGroup]="productForm" (ngSubmit)="saveProduct()" class="form-stack">
+          <label>Supplier
+            <select formControlName="supplierId">
+              <option value="">Unassigned</option>
+              <option *ngFor="let profile of profiles" [value]="profile.id">{{ profile.businessName }}</option>
+            </select>
+          </label>
+          <label>Name <input type="text" formControlName="name" /></label>
+          <label>Description <textarea rows="3" formControlName="description"></textarea></label>
+          <div class="inline-fields">
+            <label>Category
+              <select formControlName="category">
+                <option *ngFor="let row of categoryRows" [value]="row.category.name">{{ row.category.name }}</option>
+              </select>
+            </label>
+            <label>Unit <input type="text" formControlName="unit" /></label>
+          </div>
+          <div class="inline-fields">
+            <label>Price <input type="number" formControlName="price" min="0" step="0.01" /></label>
+            <label>Available <input type="number" formControlName="availableQuantity" min="0" step="0.01" /></label>
+          </div>
+          <div class="inline-fields">
+            <label>Stock <input type="number" formControlName="stockQuantity" min="0" step="1" /></label>
+            <label>Region
+              <select formControlName="region">
+                <option *ngFor="let region of regions" [value]="region.name">{{ region.name }}</option>
+              </select>
+            </label>
+          </div>
+          <label>City
+            <select formControlName="city">
+              <option *ngFor="let city of cityOptions" [value]="city.name">{{ city.name }}</option>
+            </select>
+          </label>
+          <label class="check-row"><input type="checkbox" formControlName="isAvailable" /> Visible in marketplace</label>
+          <div class="actions">
+            <button type="submit" class="primary" [disabled]="saving">{{ editingProductId ? 'Update' : 'Create' }}</button>
+            <button type="button" class="ghost" (click)="resetProductForm()">Reset</button>
+          </div>
+        </form>
+      </article>
+
+      <article class="panel wide">
+        <div class="panel-title">
+          <h2>Products and RFQs</h2>
+          <span>{{ products.length }} products, {{ rfqs.length }} RFQs</span>
+        </div>
+        <div class="split-list">
+          <div>
+            <h3>Marketplace Products</h3>
+            <div class="list-row product" *ngFor="let product of products">
+              <div>
+                <strong>{{ product.name }}</strong>
+                <span>{{ product.category }} - {{ product.region || 'No region' }}</span>
+              </div>
+              <span>{{ product.price | number:'1.2-2' }} ETB</span>
+              <span class="status" [class.muted]="!product.isAvailable">{{ product.isAvailable ? 'Live' : 'Hidden' }}</span>
+              <button type="button" class="icon" (click)="editProduct(product)"><span class="material-symbol">edit</span></button>
+            </div>
+          </div>
+          <div>
+            <h3>RFQ Management</h3>
+            <div class="list-row rfq" *ngFor="let rfq of rfqs">
+              <div>
+                <strong>{{ rfq.productName }}</strong>
+                <span>{{ rfq.buyerName }} - {{ rfq.quantity | number:'1.0-2' }} {{ rfq.unit }}</span>
+              </div>
+              <span>{{ rfq.quoteCount }} quotes</span>
+              <select [value]="rfq.status" (change)="updateRfqStatus(rfq, $any($event.target).value)">
+                <option *ngFor="let status of rfqStatuses" [value]="status">{{ status }}</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <section *ngIf="activeSection === 'settings'" class="workspace-grid">
+      <article class="panel">
+        <h2>{{ editingCategoryId ? 'Edit Category' : 'Define Category' }}</h2>
+        <form [formGroup]="categoryForm" (ngSubmit)="saveCategory()" class="form-stack">
+          <label>Parent
+            <select formControlName="parentCategoryId">
+              <option value="">Root category</option>
+              <option *ngFor="let row of categoryRows" [value]="row.category.id">{{ row.category.name }}</option>
+            </select>
+          </label>
+          <label>Name <input type="text" formControlName="name" /></label>
+          <label>Description <textarea rows="3" formControlName="description"></textarea></label>
+          <div class="inline-fields">
+            <label>Sort <input type="number" formControlName="sortOrder" min="0" /></label>
+            <label class="check-row"><input type="checkbox" formControlName="isActive" /> Active</label>
+          </div>
+          <div class="actions">
+            <button type="submit" class="primary" [disabled]="saving">{{ editingCategoryId ? 'Update' : 'Create' }}</button>
+            <button type="button" class="ghost" (click)="resetCategoryForm()">Reset</button>
+          </div>
+        </form>
+
+        <h2 class="subhead">{{ editingRegionId ? 'Edit Region' : 'Define Region' }}</h2>
+        <form [formGroup]="regionForm" (ngSubmit)="saveRegion()" class="form-stack">
+          <label>Name <input type="text" formControlName="name" /></label>
+          <label>Code <input type="text" formControlName="code" /></label>
+          <label class="check-row"><input type="checkbox" formControlName="isActive" /> Active</label>
+          <div class="actions">
+            <button type="submit" class="primary" [disabled]="saving">{{ editingRegionId ? 'Update' : 'Create' }}</button>
+            <button type="button" class="ghost" (click)="resetRegionForm()">Reset</button>
+          </div>
+        </form>
+
+        <h2 class="subhead">{{ editingCityId ? 'Edit City' : 'Add City' }}</h2>
+        <form [formGroup]="cityForm" (ngSubmit)="saveCity()" class="form-stack">
+          <label>Region
+            <select formControlName="regionId">
+              <option *ngFor="let region of regions" [value]="region.id">{{ region.name }}</option>
+            </select>
+          </label>
+          <label>Name <input type="text" formControlName="name" /></label>
+          <label class="check-row"><input type="checkbox" formControlName="isActive" /> Active</label>
+          <div class="actions">
+            <button type="submit" class="primary" [disabled]="saving">{{ editingCityId ? 'Update' : 'Create' }}</button>
+            <button type="button" class="ghost" (click)="resetCityForm()">Reset</button>
+          </div>
+        </form>
+      </article>
+
+      <article class="panel wide">
+        <div class="panel-title">
+          <h2>Master Data</h2>
+          <span>{{ categories.length }} categories, {{ regions.length }} regions</span>
+        </div>
+        <div class="settings-grid">
+          <div>
+            <h3>Category Tree</h3>
+            <div class="master-row" *ngFor="let row of categoryRows">
+              <span [style.padding-left.rem]="row.depth">{{ row.category.name }}</span>
+              <span class="status" [class.muted]="!row.category.isActive">{{ row.category.isActive ? 'Active' : 'Inactive' }}</span>
+              <button type="button" class="icon" (click)="editCategory(row.category)"><span class="material-symbol">edit</span></button>
+            </div>
+          </div>
+          <div>
+            <h3>Regions and Cities</h3>
+            <div class="master-row" *ngFor="let region of regions">
+              <span>{{ region.name }} <small>{{ region.cities.length }} cities</small></span>
+              <span class="status" [class.muted]="!region.isActive">{{ region.isActive ? 'Active' : 'Inactive' }}</span>
+              <button type="button" class="icon" (click)="editRegion(region)"><span class="material-symbol">edit</span></button>
+              <div class="city-chips">
+                <button type="button" *ngFor="let city of region.cities" (click)="editCity(city)">{{ city.name }}</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </article>
+    </section>
+  </section>
+</div>

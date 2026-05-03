@@ -33,6 +33,17 @@ public class RfqsController(IMediator mediator) : ControllerBase
         return CreatedAtAction(nameof(GetAll), new { id = created.Id }, created);
     }
 
+    [Authorize]
+    [HttpPatch("{rfqId:guid}/status")]
+    public async Task<ActionResult<RfqDto>> UpdateStatus(
+        Guid rfqId,
+        [FromBody] UpdateRfqStatusDto request,
+        CancellationToken cancellationToken)
+    {
+        var updated = await mediator.Send(new UpdateRfqStatusCommand(rfqId, request), cancellationToken);
+        return updated is null ? NotFound() : Ok(updated);
+    }
+
     [HttpGet("{rfqId:guid}/quotes")]
     public async Task<ActionResult<IEnumerable<QuoteDto>>> GetQuotes(
         Guid rfqId,

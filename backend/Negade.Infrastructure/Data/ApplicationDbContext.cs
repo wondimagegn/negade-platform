@@ -8,6 +8,9 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     : DbContext(options), IApplicationDbContext
 {
     public DbSet<AppUser> AppUsers => Set<AppUser>();
+    public DbSet<Category> Categories => Set<Category>();
+    public DbSet<Region> Regions => Set<Region>();
+    public DbSet<City> Cities => Set<City>();
     public DbSet<BusinessProfile> BusinessProfiles => Set<BusinessProfile>();
     public DbSet<Product> Products => Set<Product>();
     public DbSet<Rfq> Rfqs => Set<Rfq>();
@@ -37,6 +40,48 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
                 .IsRequired()
                 .HasMaxLength(50);
             entity.HasIndex(u => u.PhoneNumber)
+                .IsUnique();
+        });
+
+        modelBuilder.Entity<Category>(entity =>
+        {
+            entity.HasKey(category => category.Id);
+            entity.HasOne(category => category.ParentCategory)
+                .WithMany(category => category.Children)
+                .HasForeignKey(category => category.ParentCategoryId)
+                .OnDelete(DeleteBehavior.Restrict);
+            entity.Property(category => category.Name)
+                .IsRequired()
+                .HasMaxLength(120);
+            entity.Property(category => category.Description)
+                .HasMaxLength(500);
+            entity.HasIndex(category => category.ParentCategoryId);
+            entity.HasIndex(category => category.Name);
+        });
+
+        modelBuilder.Entity<Region>(entity =>
+        {
+            entity.HasKey(region => region.Id);
+            entity.Property(region => region.Name)
+                .IsRequired()
+                .HasMaxLength(120);
+            entity.Property(region => region.Code)
+                .HasMaxLength(20);
+            entity.HasIndex(region => region.Name)
+                .IsUnique();
+        });
+
+        modelBuilder.Entity<City>(entity =>
+        {
+            entity.HasKey(city => city.Id);
+            entity.HasOne(city => city.Region)
+                .WithMany(region => region.Cities)
+                .HasForeignKey(city => city.RegionId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.Property(city => city.Name)
+                .IsRequired()
+                .HasMaxLength(120);
+            entity.HasIndex(city => new { city.RegionId, city.Name })
                 .IsUnique();
         });
 

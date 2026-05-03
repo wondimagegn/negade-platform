@@ -1,4 +1,5 @@
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Negade.Application.Products.Common;
 using Negade.Application.Products.Commands;
@@ -24,6 +25,7 @@ public class ProductController(IMediator mediator) : ControllerBase
         return product is null ? NotFound() : Ok(product);
     }
 
+    [Authorize]
     [HttpPost]
     public async Task<ActionResult<ProductDto>> Create([FromBody] CreateProductDto request, CancellationToken cancellationToken)
     {
@@ -31,6 +33,7 @@ public class ProductController(IMediator mediator) : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
     }
 
+    [Authorize]
     [HttpPut("{id:guid}")]
     public async Task<ActionResult<ProductDto>> Update(Guid id, [FromBody] UpdateProductDto request, CancellationToken cancellationToken)
     {
@@ -38,6 +41,7 @@ public class ProductController(IMediator mediator) : ControllerBase
         return updated is null ? NotFound() : Ok(updated);
     }
 
+    [Authorize]
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
     {

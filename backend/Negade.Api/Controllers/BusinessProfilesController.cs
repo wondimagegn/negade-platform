@@ -50,6 +50,20 @@ public class BusinessProfilesController(IMediator mediator) : ControllerBase
         return updated is null ? NotFound() : Ok(updated);
     }
 
+    [Authorize]
+    [HttpPut("{businessProfileId:guid}")]
+    public async Task<ActionResult<BusinessProfileDto>> Update(
+        Guid businessProfileId,
+        [FromBody] UpdateBusinessProfileDto request,
+        CancellationToken cancellationToken)
+    {
+        var updated = await mediator.Send(
+            new UpdateBusinessProfileCommand(businessProfileId, request),
+            cancellationToken);
+
+        return updated is null ? NotFound() : Ok(updated);
+    }
+
     private Guid? GetUserId()
     {
         var id = User.FindFirstValue(ClaimTypes.NameIdentifier);

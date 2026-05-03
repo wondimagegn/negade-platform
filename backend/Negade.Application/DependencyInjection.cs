@@ -17,6 +17,7 @@ public static class DependencyInjection
         var config = TypeAdapterConfig.GlobalSettings;
         config.NewConfig<BusinessProfile, BusinessProfileDto>();
         config.NewConfig<CreateBusinessProfileDto, BusinessProfile>();
+        config.NewConfig<UpdateBusinessProfileDto, BusinessProfile>();
         config.NewConfig<Product, ProductDto>()
             .Map(destination => destination.SupplierName, source => source.Supplier == null ? null : source.Supplier.BusinessName);
         config.NewConfig<CreateProductDto, Product>();

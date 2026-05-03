@@ -6,6 +6,9 @@ namespace Negade.Application.Common.Interfaces;
 public interface IApplicationDbContext
 {
     DbSet<AppUser> AppUsers { get; }
+    DbSet<Category> Categories { get; }
+    DbSet<Region> Regions { get; }
+    DbSet<City> Cities { get; }
     DbSet<BusinessProfile> BusinessProfiles { get; }
     DbSet<Product> Products { get; }
     DbSet<Rfq> Rfqs { get; }

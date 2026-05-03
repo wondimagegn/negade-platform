@@ -43,6 +43,8 @@ export interface BusinessProfilePayload {
   businessType: string;
 }
 
+export type UpdateBusinessProfilePayload = BusinessProfilePayload;
+
 export interface Rfq {
   id: string;
   buyerName: string;

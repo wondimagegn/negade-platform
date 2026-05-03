@@ -1,0 +1,75 @@
+<section class="portal-hero">
+  <div>
+    <p>Buyer Workspace</p>
+    <h1>Find trusted supply and submit RFQs quickly</h1>
+  </div>
+  <button type="button" (click)="load()" [disabled]="loading">Refresh</button>
+</section>
+
+<p *ngIf="errorMessage" class="portal-notice error">{{ errorMessage }}</p>
+<p *ngIf="successMessage" class="portal-notice success">{{ successMessage }}</p>
+
+<section class="portal-metrics">
+  <article><strong>{{ products.length }}</strong><span>Products found</span></article>
+  <article><strong>{{ rfqs.length }}</strong><span>RFQs in market</span></article>
+  <article><strong>{{ products[0]?.supplierName || 'Trusted suppliers' }}</strong><span>Available network</span></article>
+</section>
+
+<section class="portal-grid">
+  <article class="portal-panel wide">
+    <h2>Marketplace Search</h2>
+    <form [formGroup]="searchForm" (ngSubmit)="search()" class="portal-search">
+      <input type="search" formControlName="search" placeholder="Search teff, coffee, cement..." />
+      <input type="text" formControlName="category" placeholder="Category" />
+      <input type="text" formControlName="region" placeholder="Region" />
+      <button type="submit" [disabled]="loading">Search</button>
+    </form>
+
+    <div class="portal-list">
+      <div class="portal-row" *ngFor="let product of products">
+        <div>
+          <strong>{{ product.name }}</strong>
+          <span>{{ product.category }} - {{ product.region || 'Any region' }} / {{ product.city || 'Any city' }}</span>
+        </div>
+        <span>{{ product.price | number:'1.2-2' }} ETB / {{ product.unit }}</span>
+        <span>{{ product.availableQuantity | number:'1.0-2' }} available</span>
+      </div>
+      <p *ngIf="products.length === 0" class="empty">No products found yet.</p>
+    </div>
+  </article>
+
+  <article class="portal-panel">
+    <h2>Request a Quote</h2>
+    <form [formGroup]="rfqForm" (ngSubmit)="createRfq()" class="portal-form">
+      <input type="text" formControlName="buyerName" placeholder="Buyer name" />
+      <input type="tel" formControlName="buyerPhoneNumber" placeholder="Phone number" />
+      <input type="text" formControlName="buyerBusinessName" placeholder="Business name" />
+      <input type="text" formControlName="productName" placeholder="Product needed" />
+      <div class="two-fields">
+        <input type="text" formControlName="category" placeholder="Category" />
+        <input type="number" formControlName="quantity" min="0.01" step="0.01" placeholder="Quantity" />
+      </div>
+      <div class="two-fields">
+        <input type="text" formControlName="unit" placeholder="Unit" />
+        <input type="text" formControlName="deliveryRegion" placeholder="Delivery region" />
+      </div>
+      <input type="text" formControlName="deliveryCity" placeholder="Delivery city" />
+      <textarea rows="3" formControlName="notes" placeholder="Notes"></textarea>
+      <button type="submit" [disabled]="saving">Submit RFQ</button>
+    </form>
+  </article>
+</section>
+
+<section class="portal-panel">
+  <h2>Recent RFQs</h2>
+  <div class="portal-list compact">
+    <div class="portal-row" *ngFor="let rfq of rfqs">
+      <div>
+        <strong>{{ rfq.productName }}</strong>
+        <span>{{ rfq.quantity | number:'1.0-2' }} {{ rfq.unit }} - {{ rfq.deliveryRegion }}</span>
+      </div>
+      <span>{{ rfq.status }}</span>
+      <span>{{ rfq.quoteCount }} quotes</span>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,53 @@
+<section class="auth-page">
+  <article class="auth-panel">
+    <div>
+      <p>{{ audience === 'admin' ? 'Management access' : 'Trade access' }}</p>
+      <h1>{{ title }}</h1>
+    </div>
+
+    <div class="mode-tabs">
+      <button type="button" [class.active]="mode === 'login'" (click)="mode = 'login'">Login</button>
+      <button type="button" [class.active]="mode === 'register'" (click)="mode = 'register'">Register</button>
+    </div>
+
+    <p *ngIf="errorMessage" class="error">{{ errorMessage }}</p>
+
+    <form *ngIf="mode === 'login'" [formGroup]="loginForm" (ngSubmit)="login()" class="form-stack">
+      <label>
+        Phone
+        <input type="tel" formControlName="phoneNumber" autocomplete="tel" />
+      </label>
+      <label>
+        Password
+        <input type="password" formControlName="password" autocomplete="current-password" />
+      </label>
+      <button type="submit" [disabled]="authenticating">{{ authenticating ? 'Signing in...' : 'Login' }}</button>
+    </form>
+
+    <form *ngIf="mode === 'register'" [formGroup]="registerForm" (ngSubmit)="register()" class="form-stack">
+      <label>
+        Full Name
+        <input type="text" formControlName="fullName" autocomplete="name" />
+      </label>
+      <label>
+        Phone
+        <input type="tel" formControlName="phoneNumber" autocomplete="tel" />
+      </label>
+      <label>
+        Email
+        <input type="email" formControlName="email" autocomplete="email" />
+      </label>
+      <label>
+        Password
+        <input type="password" formControlName="password" autocomplete="new-password" />
+      </label>
+      <button type="submit" [disabled]="authenticating">{{ authenticating ? 'Creating...' : 'Create Account' }}</button>
+    </form>
+
+    <div class="route-links">
+      <a routerLink="/">Trade Hub</a>
+      <a routerLink="/admin/login" *ngIf="audience !== 'admin'">Admin Login</a>
+      <a routerLink="/login" *ngIf="audience === 'admin'">Buyer/Supplier Login</a>
+    </div>
+  </article>
+</section>
