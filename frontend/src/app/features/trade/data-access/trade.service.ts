@@ -14,7 +14,8 @@ import {
   TradeHistory,
   TradeHistoryPayload,
   TradeRating,
-  TradeRatingPayload
+  TradeRatingPayload,
+  UpdateBusinessProfilePayload
 } from './trade.models';
 import { AuthService } from './auth.service';
 
@@ -49,6 +50,12 @@ export class TradeService {
       { verificationStatus },
       { headers: this.authHeaders() }
     );
+  }
+
+  updateBusinessProfile(profileId: string, payload: UpdateBusinessProfilePayload): Observable<BusinessProfile> {
+    return this.http.put<BusinessProfile>(`${this.apiBaseUrl}/api/business-profiles/${profileId}`, payload, {
+      headers: this.authHeaders()
+    });
   }
 
   getRfqs(): Observable<Rfq[]> {
