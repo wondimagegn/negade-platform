@@ -1,11 +1,11 @@
 <section class="auth-page">
   <article class="auth-panel">
     <div>
-      <p>{{ audience === 'admin' ? 'Management access' : 'Trade access' }}</p>
+      <p>{{ audience === 'admin' ? 'Internal access' : 'Trade access' }}</p>
       <h1>{{ title }}</h1>
     </div>
 
-    <div class="mode-tabs">
+    <div class="mode-tabs" *ngIf="audience !== 'admin'">
       <button type="button" [class.active]="mode === 'login'" (click)="mode = 'login'">Login</button>
       <button type="button" [class.active]="mode === 'register'" (click)="mode = 'register'">Register</button>
     </div>
@@ -24,7 +24,7 @@
       <button type="submit" [disabled]="authenticating">{{ authenticating ? 'Signing in...' : 'Login' }}</button>
     </form>
 
-    <form *ngIf="mode === 'register'" [formGroup]="registerForm" (ngSubmit)="register()" class="form-stack">
+    <form *ngIf="mode === 'register' && audience !== 'admin'" [formGroup]="registerForm" (ngSubmit)="register()" class="form-stack">
       <label>
         Full Name
         <input type="text" formControlName="fullName" autocomplete="name" />
@@ -45,8 +45,7 @@
     </form>
 
     <div class="route-links">
-      <a routerLink="/">Trade Hub</a>
-      <a routerLink="/admin/login" *ngIf="audience !== 'admin'">Admin Login</a>
+      <a routerLink="/portal/trade">Trade Hub</a>
       <a routerLink="/login" *ngIf="audience === 'admin'">Buyer/Supplier Login</a>
     </div>
   </article>

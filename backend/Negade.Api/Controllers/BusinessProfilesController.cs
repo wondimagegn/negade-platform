@@ -27,6 +27,20 @@ public class BusinessProfilesController(IMediator mediator) : ControllerBase
     }
 
     [Authorize]
+    [HttpGet("me")]
+    public async Task<ActionResult<IEnumerable<BusinessProfileDto>>> GetMine(CancellationToken cancellationToken)
+    {
+        var userId = GetUserId();
+        if (userId is null)
+        {
+            return Unauthorized();
+        }
+
+        var profiles = await mediator.Send(new GetMyBusinessProfilesQuery(userId.Value), cancellationToken);
+        return Ok(profiles);
+    }
+
+    [Authorize]
     [HttpPost]
     public async Task<ActionResult<BusinessProfileDto>> Create(
         [FromBody] CreateBusinessProfileDto request,

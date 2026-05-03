@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { finalize, forkJoin } from 'rxjs';
 import { AuthResponse, AuthService } from '../data-access/auth.service';
 import { BusinessProfile, Product, Quote, Rfq } from '../data-access/trade.models';
@@ -9,7 +10,7 @@ import { TradeService } from '../data-access/trade.service';
 @Component({
   selector: 'app-trade-hub-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink],
   templateUrl: './trade-hub-page.component.html',
   styleUrl: './trade-hub-page.component.css'
 })
@@ -101,6 +102,27 @@ export class TradeHubPageComponent implements OnInit {
     amount: [0],
     tradeDate: [new Date().toISOString().slice(0, 10)]
   });
+
+  get verifiedSuppliers(): BusinessProfile[] {
+    return this.suppliers.filter((supplier) => supplier.verificationStatus === 'Verified');
+  }
+
+  get categoryOptions(): string[] {
+    return [...new Set([
+      ...this.products.map((product) => product.category),
+      ...this.rfqs.map((rfq) => rfq.category)
+    ].filter(Boolean))]
+      .sort((first, second) => first.localeCompare(second));
+  }
+
+  get regionOptions(): string[] {
+    return [...new Set([
+      ...this.products.map((product) => product.region),
+      ...this.suppliers.map((supplier) => supplier.region),
+      ...this.rfqs.map((rfq) => rfq.deliveryRegion)
+    ].filter(Boolean))]
+      .sort((first, second) => first.localeCompare(second));
+  }
 
   ngOnInit(): void {
     this.currentUser = this.authService.currentUser;

@@ -11,6 +11,7 @@ import {
   QuotePayload,
   Rfq,
   RfqPayload,
+  SupplierQuote,
   TradeHistory,
   TradeHistoryPayload,
   TradeRating,
@@ -36,6 +37,12 @@ export class TradeService {
 
   getBusinessProfiles(): Observable<BusinessProfile[]> {
     return this.http.get<BusinessProfile[]>(`${this.apiBaseUrl}/api/business-profiles`);
+  }
+
+  getMyBusinessProfiles(): Observable<BusinessProfile[]> {
+    return this.http.get<BusinessProfile[]>(`${this.apiBaseUrl}/api/business-profiles/me`, {
+      headers: this.authHeaders()
+    });
   }
 
   createBusinessProfile(payload: BusinessProfilePayload): Observable<BusinessProfile> {
@@ -70,6 +77,12 @@ export class TradeService {
 
   getQuotes(rfqId: string): Observable<Quote[]> {
     return this.http.get<Quote[]>(`${this.apiBaseUrl}/api/rfqs/${rfqId}/quotes`);
+  }
+
+  getMyQuotes(): Observable<SupplierQuote[]> {
+    return this.http.get<SupplierQuote[]>(`${this.apiBaseUrl}/api/rfqs/my-quotes`, {
+      headers: this.authHeaders()
+    });
   }
 
   createQuote(rfqId: string, payload: QuotePayload): Observable<Quote> {

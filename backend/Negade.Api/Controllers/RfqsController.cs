@@ -44,6 +44,20 @@ public class RfqsController(IMediator mediator) : ControllerBase
         return updated is null ? NotFound() : Ok(updated);
     }
 
+    [Authorize]
+    [HttpGet("my-quotes")]
+    public async Task<ActionResult<IEnumerable<SupplierQuoteDto>>> GetMyQuotes(CancellationToken cancellationToken)
+    {
+        var userId = GetUserId();
+        if (userId is null)
+        {
+            return Unauthorized();
+        }
+
+        var quotes = await mediator.Send(new GetMyQuotesQuery(userId.Value), cancellationToken);
+        return Ok(quotes);
+    }
+
     [HttpGet("{rfqId:guid}/quotes")]
     public async Task<ActionResult<IEnumerable<QuoteDto>>> GetQuotes(
         Guid rfqId,
@@ -60,8 +74,14 @@ public class RfqsController(IMediator mediator) : ControllerBase
         [FromBody] CreateQuoteDto request,
         CancellationToken cancellationToken)
     {
-        var created = await mediator.Send(new CreateQuoteCommand(rfqId, request, GetUserId()), cancellationToken);
-        return created is null ? NotFound() : CreatedAtAction(nameof(GetQuotes), new { rfqId }, created);
+        var result = await mediator.Send(new CreateQuoteCommand(rfqId, request, GetUserId()), cancellationToken);
+        return result.FailureReason switch
+        {
+            CreateQuoteFailureReason.None => CreatedAtAction(nameof(GetQuotes), new { rfqId }, result.Quote),
+            CreateQuoteFailureReason.SupplierNotOwned => Forbid(),
+            CreateQuoteFailureReason.SupplierNotFound => BadRequest("Supplier profile was not found."),
+            _ => NotFound()
+        };
     }
 
     private Guid? GetUserId()

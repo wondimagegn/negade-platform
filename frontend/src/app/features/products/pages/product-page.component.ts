@@ -7,6 +7,7 @@ import { ProductService } from '../data-access/product.service';
 
 @Component({
   selector: 'app-product-page',
+  standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './product-page.component.html',
   styleUrl: './product-page.component.css'

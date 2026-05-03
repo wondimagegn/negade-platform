@@ -7,7 +7,7 @@ import { SupplierPortalPageComponent } from './features/trade/pages/supplier-por
 import { TradeHubPageComponent } from './features/trade/pages/trade-hub-page.component';
 import { BackofficeLayoutComponent } from './layouts/backoffice-layout.component';
 import { PortalLayoutComponent } from './layouts/portal-layout.component';
-import { ProductPageComponent } from './products/pages/product-page/product-page.component';
+import { ProductPageComponent } from './features/products/pages/product-page.component';
 
 export const appRoutes: Routes = [
   { path: '', redirectTo: 'portal/buyer', pathMatch: 'full' },

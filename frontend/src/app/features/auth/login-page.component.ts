@@ -37,6 +37,7 @@ export class LoginPageComponent implements OnInit {
 
   ngOnInit(): void {
     this.audience = this.route.snapshot.data['audience'] === 'admin' ? 'admin' : 'trader';
+    this.mode = this.audience === 'admin' ? 'login' : this.mode;
 
     if (this.authService.currentUser) {
       this.router.navigateByUrl(this.returnUrl);
@@ -44,11 +45,11 @@ export class LoginPageComponent implements OnInit {
   }
 
   get title(): string {
-    return this.audience === 'admin' ? 'Admin sign in' : 'Buyer and supplier sign in';
+    return this.audience === 'admin' ? 'Backoffice sign in' : 'Buyer and supplier sign in';
   }
 
   get returnUrl(): string {
-    return this.route.snapshot.queryParamMap.get('returnUrl') || (this.audience === 'admin' ? '/admin' : '/');
+    return this.route.snapshot.queryParamMap.get('returnUrl') || (this.audience === 'admin' ? '/backoffice' : '/portal/buyer');
   }
 
   login(): void {

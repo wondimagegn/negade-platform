@@ -75,6 +75,18 @@ export interface Quote {
   createdAt: string;
 }
 
+export interface SupplierQuote extends Quote {
+  rfqProductName: string;
+  rfqCategory: string;
+  rfqQuantity: number;
+  rfqUnit: string;
+  rfqDeliveryRegion: string;
+  rfqDeliveryCity: string;
+  rfqStatus: string;
+  buyerName: string;
+  buyerBusinessName?: string | null;
+}
+
 export interface QuotePayload {
   supplierId: string;
   unitPrice: number;
