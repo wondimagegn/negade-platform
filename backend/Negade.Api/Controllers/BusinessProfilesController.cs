@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Negade.Application.BusinessProfiles.Commands;
 using Negade.Application.BusinessProfiles.Common;
 using Negade.Application.BusinessProfiles.Queries;
+using Negade.Domain.Security;
 
 namespace Negade.Api.Controllers;
 
@@ -27,6 +28,20 @@ public class BusinessProfilesController(IMediator mediator) : ControllerBase
     }
 
     [Authorize]
+    [HttpGet("me")]
+    public async Task<ActionResult<IEnumerable<BusinessProfileDto>>> GetMine(CancellationToken cancellationToken)
+    {
+        var userId = GetUserId();
+        if (userId is null)
+        {
+            return Unauthorized();
+        }
+
+        var profiles = await mediator.Send(new GetMyBusinessProfilesQuery(userId.Value), cancellationToken);
+        return Ok(profiles);
+    }
+
+    [Authorize]
     [HttpPost]
     public async Task<ActionResult<BusinessProfileDto>> Create(
         [FromBody] CreateBusinessProfileDto request,
@@ -36,7 +51,7 @@ public class BusinessProfilesController(IMediator mediator) : ControllerBase
         return CreatedAtAction(nameof(GetAll), new { id = created.Id }, created);
     }
 
-    [Authorize]
+    [Authorize(Roles = AppRoles.Admin)]
     [HttpPatch("{businessProfileId:guid}/verification")]
     public async Task<ActionResult<BusinessProfileDto>> Verify(
         Guid businessProfileId,
@@ -50,7 +65,7 @@ public class BusinessProfilesController(IMediator mediator) : ControllerBase
         return updated is null ? NotFound() : Ok(updated);
     }
 
-    [Authorize]
+    [Authorize(Roles = AppRoles.Admin)]
     [HttpPut("{businessProfileId:guid}")]
     public async Task<ActionResult<BusinessProfileDto>> Update(
         Guid businessProfileId,

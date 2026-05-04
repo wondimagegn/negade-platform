@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Negade.Application.Common.Interfaces;
 using Negade.Domain.Entities;
@@ -5,7 +7,7 @@ using Negade.Domain.Entities;
 namespace Negade.Infrastructure.Data;
 
 public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
-    : DbContext(options), IApplicationDbContext
+    : IdentityDbContext<AppUser, IdentityRole<Guid>, Guid>(options), IApplicationDbContext
 {
     public DbSet<AppUser> AppUsers => Set<AppUser>();
     public DbSet<Category> Categories => Set<Category>();
@@ -24,21 +26,9 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 
         modelBuilder.Entity<AppUser>(entity =>
         {
-            entity.HasKey(u => u.Id);
             entity.Property(u => u.FullName)
                 .IsRequired()
                 .HasMaxLength(200);
-            entity.Property(u => u.PhoneNumber)
-                .IsRequired()
-                .HasMaxLength(100);
-            entity.Property(u => u.Email)
-                .HasMaxLength(200);
-            entity.Property(u => u.PasswordHash)
-                .IsRequired()
-                .HasMaxLength(500);
-            entity.Property(u => u.Role)
-                .IsRequired()
-                .HasMaxLength(50);
             entity.HasIndex(u => u.PhoneNumber)
                 .IsUnique();
         });

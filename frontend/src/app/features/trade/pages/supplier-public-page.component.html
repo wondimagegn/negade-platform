@@ -1,0 +1,72 @@
+<section class="supplier-public-hero">
+  <div>
+    <p>Supplier Network</p>
+    <h1>Sell to verified buyers and respond to active RFQs</h1>
+    <span>Build a trusted supplier profile, publish products, quote buyer demand, and grow your trade record on Negade.</span>
+  </div>
+  <div class="supplier-public-actions">
+    <a routerLink="/login" [queryParams]="{ returnUrl: '/portal/supplier/workspace' }">Create Supplier Account</a>
+    <a class="secondary" routerLink="/portal/supplier/workspace">Open Supplier Workspace</a>
+  </div>
+</section>
+
+<p *ngIf="errorMessage" class="portal-notice error">{{ errorMessage }}</p>
+
+<section class="portal-metrics supplier-public-metrics">
+  <article><strong>{{ openRfqs.length }}</strong><span>Open buyer RFQs</span></article>
+  <article><strong>{{ verifiedSuppliers.length }}</strong><span>Verified suppliers</span></article>
+  <article><strong>{{ suppliers.length }}</strong><span>Supplier profiles</span></article>
+</section>
+
+<section class="supplier-public-grid">
+  <article class="portal-panel">
+    <p class="panel-kicker">Supplier Workflow</p>
+    <h2>What suppliers do on Negade</h2>
+    <div class="supplier-steps">
+      <div>
+        <strong>1. Create a company profile</strong>
+        <span>Add business details, location, contact information, and category focus.</span>
+      </div>
+      <div>
+        <strong>2. Build trust signals</strong>
+        <span>Submit your profile for verification and grow ratings and trade history over time.</span>
+      </div>
+      <div>
+        <strong>3. Publish products</strong>
+        <span>List supply, prices, available quantity, delivery city, and marketplace visibility.</span>
+      </div>
+      <div>
+        <strong>4. Quote active RFQs</strong>
+        <span>Review buyer demand, choose a supplier profile, and submit price, quantity, and delivery terms.</span>
+      </div>
+    </div>
+  </article>
+
+  <article class="portal-panel">
+    <div class="portal-panel-title">
+      <div>
+        <p class="panel-kicker">Live Demand</p>
+        <h2>RFQs suppliers can respond to</h2>
+      </div>
+      <button type="button" class="light-button" (click)="load()" [disabled]="loading">Refresh</button>
+    </div>
+    <div class="opportunity-list public-opportunities">
+      <button type="button" *ngFor="let rfq of openRfqs.slice(0, 5)" routerLink="/portal/supplier/workspace">
+        <span>
+          <strong>{{ rfq.productName }}</strong>
+          <small>{{ rfq.quantity | number:'1.0-2' }} {{ rfq.unit }} - {{ rfq.deliveryRegion }} / {{ rfq.deliveryCity }}</small>
+        </span>
+        <span class="portal-chip">{{ rfq.quoteCount }} quotes</span>
+      </button>
+      <p *ngIf="openRfqs.length === 0" class="empty">Open RFQs will appear here.</p>
+    </div>
+  </article>
+</section>
+
+<section class="portal-panel supplier-public-band">
+  <div>
+    <p class="panel-kicker">Ready to supply?</p>
+    <h2>Register once, then manage your profile, catalog, quotes, and trust record from the supplier workspace.</h2>
+  </div>
+  <a routerLink="/login" [queryParams]="{ returnUrl: '/portal/supplier/workspace' }">Start as Supplier</a>
+</section>

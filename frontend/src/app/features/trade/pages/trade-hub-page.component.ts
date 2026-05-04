@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { finalize, forkJoin } from 'rxjs';
 import { AuthResponse, AuthService } from '../data-access/auth.service';
 import { BusinessProfile, Product, Quote, Rfq } from '../data-access/trade.models';
@@ -9,7 +10,7 @@ import { TradeService } from '../data-access/trade.service';
 @Component({
   selector: 'app-trade-hub-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink],
   templateUrl: './trade-hub-page.component.html',
   styleUrl: './trade-hub-page.component.css'
 })
@@ -33,13 +34,14 @@ export class TradeHubPageComponent implements OnInit {
   successMessage = '';
 
   readonly loginForm = this.fb.nonNullable.group({
-    phoneNumber: [''],
+    identifier: [''],
     password: ['']
   });
 
   readonly registerForm = this.fb.nonNullable.group({
     fullName: [''],
     phoneNumber: [''],
+    userName: [''],
     email: [''],
     password: ['']
   });
@@ -102,6 +104,27 @@ export class TradeHubPageComponent implements OnInit {
     tradeDate: [new Date().toISOString().slice(0, 10)]
   });
 
+  get verifiedSuppliers(): BusinessProfile[] {
+    return this.suppliers.filter((supplier) => supplier.verificationStatus === 'Verified');
+  }
+
+  get categoryOptions(): string[] {
+    return [...new Set([
+      ...this.products.map((product) => product.category),
+      ...this.rfqs.map((rfq) => rfq.category)
+    ].filter(Boolean))]
+      .sort((first, second) => first.localeCompare(second));
+  }
+
+  get regionOptions(): string[] {
+    return [...new Set([
+      ...this.products.map((product) => product.region),
+      ...this.suppliers.map((supplier) => supplier.region),
+      ...this.rfqs.map((rfq) => rfq.deliveryRegion)
+    ].filter(Boolean))]
+      .sort((first, second) => first.localeCompare(second));
+  }
+
   ngOnInit(): void {
     this.currentUser = this.authService.currentUser;
     this.authService.currentUser$.subscribe((user) => (this.currentUser = user));
@@ -121,7 +144,7 @@ export class TradeHubPageComponent implements OnInit {
       .subscribe({
         next: () => {
           this.successMessage = 'Account created.';
-          this.registerForm.reset({ fullName: '', phoneNumber: '', email: '', password: '' });
+          this.registerForm.reset({ fullName: '', phoneNumber: '', userName: '', email: '', password: '' });
         },
         error: () => (this.errorMessage = 'Could not register this account.')
       });
@@ -140,9 +163,9 @@ export class TradeHubPageComponent implements OnInit {
       .subscribe({
         next: () => {
           this.successMessage = 'Signed in.';
-          this.loginForm.reset({ phoneNumber: '', password: '' });
+          this.loginForm.reset({ identifier: '', password: '' });
         },
-        error: () => (this.errorMessage = 'Invalid phone number or password.')
+        error: () => (this.errorMessage = 'Invalid email, username, phone, or password.')
       });
   }
 

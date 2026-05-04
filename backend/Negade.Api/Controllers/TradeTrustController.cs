@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Negade.Application.TradeTrust.Commands;
 using Negade.Application.TradeTrust.Common;
 using Negade.Application.TradeTrust.Queries;
+using Negade.Domain.Security;
 
 namespace Negade.Api.Controllers;
 
@@ -47,7 +48,7 @@ public class TradeTrustController(IMediator mediator) : ControllerBase
         return Ok(history);
     }
 
-    [Authorize]
+    [Authorize(Roles = AppRoles.Admin)]
     [HttpPost("trade-history")]
     public async Task<ActionResult<TradeHistoryDto>> CreateTradeHistory(
         Guid businessProfileId,

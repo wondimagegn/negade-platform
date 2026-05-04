@@ -1,7 +1,7 @@
 <section class="portal-hero">
   <div>
-    <p>Supplier Workspace</p>
-    <h1>Manage your profile and respond to buyer demand</h1>
+    <p>Supplier Center</p>
+    <h1>Manage your company, catalog, RFQs, and trust signals</h1>
   </div>
   <button type="button" (click)="load()" [disabled]="loading">Refresh</button>
 </section>
@@ -9,73 +9,169 @@
 <p *ngIf="errorMessage" class="portal-notice error">{{ errorMessage }}</p>
 <p *ngIf="successMessage" class="portal-notice success">{{ successMessage }}</p>
 
-<section class="portal-metrics">
-  <article><strong>{{ profiles.length }}</strong><span>Supplier profiles</span></article>
-  <article><strong>{{ rfqs.length }}</strong><span>Open opportunities</span></article>
-  <article><strong>{{ profiles[0]?.verificationStatus || 'Pending' }}</strong><span>Verification state</span></article>
+<section class="portal-metrics supplier-metrics">
+  <article><strong>{{ readinessScore }}%</strong><span>Profile readiness</span></article>
+  <article><strong>{{ profiles.length }}</strong><span>Business profiles</span></article>
+  <article><strong>{{ verifiedProfiles.length }}</strong><span>Verified profiles</span></article>
+  <article><strong>{{ ownedProducts.length }}</strong><span>Catalog products</span></article>
+  <article><strong>{{ openRfqs.length }}</strong><span>Open RFQ opportunities</span></article>
 </section>
 
-<section class="portal-grid">
+<section class="supplier-dashboard-grid">
   <article class="portal-panel">
-    <h2>Create Supplier Profile</h2>
+    <h2>Company Profile</h2>
     <form [formGroup]="profileForm" (ngSubmit)="createProfile()" class="portal-form">
       <input type="text" formControlName="businessName" placeholder="Business name" />
       <input type="text" formControlName="ownerName" placeholder="Owner name" />
-      <input type="text" formControlName="tinNumber" placeholder="TIN" />
-      <input type="tel" formControlName="phoneNumber" placeholder="Phone" />
+      <div class="two-fields">
+        <input type="text" formControlName="tinNumber" placeholder="TIN" />
+        <input type="tel" formControlName="phoneNumber" placeholder="Phone" />
+      </div>
       <div class="two-fields">
         <input type="text" formControlName="region" placeholder="Region" />
         <input type="text" formControlName="city" placeholder="City" />
       </div>
       <input type="text" formControlName="address" placeholder="Address" />
       <input type="text" formControlName="businessType" placeholder="Business type" />
-      <button type="submit" [disabled]="savingProfile">Submit Profile</button>
+      <button type="submit" [disabled]="savingProfile">Submit Profile for Verification</button>
     </form>
   </article>
 
   <article class="portal-panel wide">
-    <h2>Respond to RFQs</h2>
-    <form [formGroup]="quoteForm" (ngSubmit)="submitQuote()" class="portal-form quote-form">
-      <select formControlName="rfqId">
-        <option value="">Select RFQ</option>
-        <option *ngFor="let rfq of rfqs" [value]="rfq.id">{{ rfq.productName }} - {{ rfq.deliveryRegion }}</option>
-      </select>
+    <div class="portal-panel-title">
+      <h2>Your Profiles & Trust</h2>
+      <span>{{ profiles.length }} profile records</span>
+    </div>
+    <div class="profile-readiness-grid">
+      <div class="supplier-profile-card" *ngFor="let profile of profiles">
+        <div>
+          <strong>{{ profile.businessName }}</strong>
+          <span>{{ profile.businessType }} - {{ profile.region }} / {{ profile.city }}</span>
+        </div>
+        <span class="portal-chip" [class.warning]="profile.verificationStatus !== 'Verified'">{{ profile.verificationStatus }}</span>
+        <span>{{ profile.ratingAverage | number:'1.1-1' }} rating</span>
+        <span>{{ profile.tradeCount }} trades</span>
+      </div>
+      <p *ngIf="profiles.length === 0" class="empty">Create a supplier profile to start building trust.</p>
+    </div>
+  </article>
+</section>
+
+<section class="supplier-dashboard-grid">
+  <article class="portal-panel">
+    <h2>{{ editingProductId ? 'Edit Catalog Product' : 'Add Catalog Product' }}</h2>
+    <form [formGroup]="productForm" (ngSubmit)="saveProduct()" class="portal-form">
       <select formControlName="supplierId">
         <option value="">Select supplier profile</option>
         <option *ngFor="let profile of profiles" [value]="profile.id">{{ profile.businessName }}</option>
       </select>
+      <input type="text" formControlName="name" placeholder="Product name" />
+      <textarea rows="3" formControlName="description" placeholder="Product description"></textarea>
+      <div class="two-fields">
+        <input type="text" formControlName="category" list="supplierCategories" placeholder="Category" />
+        <input type="text" formControlName="unit" placeholder="Unit" />
+      </div>
+      <datalist id="supplierCategories">
+        <option *ngFor="let category of categoryOptions" [value]="category"></option>
+      </datalist>
+      <div class="two-fields">
+        <input type="number" formControlName="price" min="0" step="0.01" placeholder="Price" />
+        <input type="number" formControlName="availableQuantity" min="0" step="0.01" placeholder="Available quantity" />
+      </div>
+      <div class="two-fields">
+        <input type="number" formControlName="stockQuantity" min="0" step="1" placeholder="Stock quantity" />
+        <input type="text" formControlName="region" placeholder="Region" />
+      </div>
+      <input type="text" formControlName="city" placeholder="City" />
+      <label class="portal-check"><input type="checkbox" formControlName="isAvailable" /> Visible in marketplace</label>
+      <button type="submit" [disabled]="savingProduct">{{ editingProductId ? 'Update Product' : 'Add Product' }}</button>
+    </form>
+  </article>
+
+  <article class="portal-panel wide">
+    <div class="portal-panel-title">
+      <h2>Product Catalog</h2>
+      <button type="button" class="light-button" (click)="resetProductForm()">New Product</button>
+    </div>
+    <div class="supplier-catalog-grid">
+      <div class="supplier-product-card" *ngFor="let product of ownedProducts">
+        <div>
+          <strong>{{ product.name }}</strong>
+          <span>{{ product.category }} - {{ product.region || 'No region' }} / {{ product.city || 'No city' }}</span>
+        </div>
+        <span class="portal-chip">{{ product.price | number:'1.2-2' }} ETB / {{ product.unit }}</span>
+        <span class="portal-chip">{{ product.availableQuantity | number:'1.0-2' }} available</span>
+        <div class="card-actions">
+          <button type="button" class="light-button" (click)="editProduct(product)">Edit</button>
+          <button type="button" class="danger-button" (click)="deleteProduct(product.id)">Delete</button>
+        </div>
+      </div>
+      <p *ngIf="ownedProducts.length === 0" class="empty">Add products so buyers can discover your supply.</p>
+    </div>
+  </article>
+</section>
+
+<section class="supplier-dashboard-grid">
+  <article class="portal-panel opportunity-panel">
+    <div class="portal-panel-title">
+      <h2>RFQ Opportunities</h2>
+      <span>{{ openRfqs.length }} open</span>
+    </div>
+    <div class="opportunity-list">
+      <button type="button" *ngFor="let rfq of openRfqs" (click)="useRfq(rfq)">
+        <span>
+          <strong>{{ rfq.productName }}</strong>
+          <small>{{ rfq.quantity | number:'1.0-2' }} {{ rfq.unit }} - {{ rfq.deliveryRegion }} / {{ rfq.deliveryCity }}</small>
+        </span>
+        <span class="portal-chip">{{ rfq.quoteCount }} quotes</span>
+      </button>
+    </div>
+  </article>
+
+  <article class="portal-panel wide">
+    <h2>Submit Quote</h2>
+    <form [formGroup]="quoteForm" (ngSubmit)="submitQuote()" class="portal-form quote-form">
+      <div class="two-fields">
+        <select formControlName="rfqId">
+          <option value="">Select RFQ</option>
+          <option *ngFor="let rfq of openRfqs" [value]="rfq.id">{{ rfq.productName }} - {{ rfq.deliveryRegion }}</option>
+        </select>
+        <select formControlName="supplierId">
+          <option value="">Select supplier profile</option>
+          <option *ngFor="let profile of profiles" [value]="profile.id">{{ profile.businessName }}</option>
+        </select>
+      </div>
       <div class="two-fields">
         <input type="number" formControlName="unitPrice" min="0.01" step="0.01" placeholder="Unit price" />
         <input type="number" formControlName="quantityAvailable" min="0.01" step="0.01" placeholder="Quantity available" />
       </div>
       <input type="number" formControlName="deliveryTimeInDays" min="0" step="1" placeholder="Delivery days" />
-      <textarea rows="3" formControlName="notes" placeholder="Quote notes"></textarea>
+      <textarea rows="3" formControlName="notes" placeholder="Payment terms, delivery capacity, quality notes"></textarea>
       <button type="submit" [disabled]="savingQuote">Submit Quote</button>
     </form>
-
-    <div class="portal-list">
-      <div class="portal-row" *ngFor="let rfq of rfqs">
-        <div>
-          <strong>{{ rfq.productName }}</strong>
-          <span>{{ rfq.quantity | number:'1.0-2' }} {{ rfq.unit }} - {{ rfq.deliveryRegion }}</span>
-        </div>
-        <span>{{ rfq.status }}</span>
-        <span>{{ rfq.quoteCount }} quotes</span>
-      </div>
-    </div>
   </article>
 </section>
 
 <section class="portal-panel">
-  <h2>Your Supplier Profiles</h2>
-  <div class="portal-list compact">
-    <div class="portal-row" *ngFor="let profile of profiles">
+  <div class="portal-panel-title">
+    <h2>My Submitted Quotes</h2>
+    <span>{{ quotes.length }} submitted</span>
+  </div>
+  <div class="supplier-quotes-list">
+    <div class="supplier-quote-card" *ngFor="let quote of quotes">
       <div>
-        <strong>{{ profile.businessName }}</strong>
-        <span>{{ profile.businessType }} - {{ profile.region }} / {{ profile.city }}</span>
+        <strong>{{ quote.rfqProductName }}</strong>
+        <span>
+          {{ quote.buyerBusinessName || quote.buyerName }} needs
+          {{ quote.rfqQuantity | number:'1.0-2' }} {{ quote.rfqUnit }}
+          in {{ quote.rfqDeliveryRegion }} / {{ quote.rfqDeliveryCity }}
+        </span>
       </div>
-      <span>{{ profile.verificationStatus }}</span>
-      <span>{{ profile.ratingAverage | number:'1.1-1' }} rating</span>
+      <span class="portal-chip">{{ quote.rfqStatus }}</span>
+      <span class="portal-chip">{{ quote.unitPrice | number:'1.2-2' }} ETB / {{ quote.rfqUnit }}</span>
+      <span class="portal-chip">{{ quote.quantityAvailable | number:'1.0-2' }} available</span>
+      <span>{{ quote.deliveryTimeInDays }} days</span>
     </div>
+    <p *ngIf="quotes.length === 0" class="empty">Submitted quotes will appear here after you respond to RFQs.</p>
   </div>
 </section>

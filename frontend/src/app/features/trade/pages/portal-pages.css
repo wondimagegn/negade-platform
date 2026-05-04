@@ -6,6 +6,113 @@
   margin-bottom: 1rem;
 }
 
+.supplier-public-hero {
+  align-items: center;
+  background: #eefcf8;
+  border: 1px solid #c7f3e7;
+  border-radius: 8px;
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: minmax(0, 1fr) auto;
+  margin-bottom: 1rem;
+  padding: 1.4rem;
+}
+
+.supplier-public-hero p,
+.supplier-public-hero h1,
+.supplier-public-hero span,
+.panel-kicker,
+.supplier-public-band h2 {
+  margin: 0;
+}
+
+.supplier-public-hero p,
+.panel-kicker {
+  color: #64748b;
+  font-weight: 900;
+}
+
+.supplier-public-hero h1 {
+  font-size: 1.8rem;
+  line-height: 1.15;
+  margin-top: 0.25rem;
+}
+
+.supplier-public-hero span {
+  color: #334155;
+  display: block;
+  margin-top: 0.45rem;
+  max-width: 760px;
+}
+
+.supplier-public-actions,
+.supplier-public-band {
+  align-items: center;
+  display: flex;
+  gap: 0.7rem;
+}
+
+.supplier-public-actions {
+  justify-content: flex-end;
+}
+
+.supplier-public-actions a,
+.supplier-public-band a {
+  background: #0f766e;
+  border-radius: 6px;
+  color: #fff;
+  font-weight: 900;
+  padding: 0.7rem 0.95rem;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.supplier-public-actions a.secondary {
+  background: #134e4a;
+}
+
+.supplier-public-metrics {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.supplier-public-grid {
+  align-items: start;
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: minmax(360px, 0.85fr) minmax(0, 1.15fr);
+  margin-bottom: 1rem;
+}
+
+.supplier-steps {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.supplier-steps div {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 0.85rem;
+}
+
+.supplier-steps strong,
+.supplier-steps span {
+  display: block;
+}
+
+.supplier-steps span {
+  color: #64748b;
+  margin-top: 0.25rem;
+}
+
+.public-opportunities button {
+  text-decoration: none;
+}
+
+.supplier-public-band {
+  justify-content: space-between;
+}
+
 .portal-hero p,
 .portal-hero h1 {
   margin: 0;
@@ -63,6 +170,10 @@
   margin-bottom: 1rem;
 }
 
+.portal-metrics.supplier-metrics {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
 .portal-metrics article,
 .portal-panel {
   background: #fff;
@@ -90,6 +201,14 @@
 .portal-grid {
   align-items: start;
   grid-template-columns: minmax(420px, 0.95fr) minmax(0, 1.45fr);
+  margin-bottom: 1rem;
+}
+
+.supplier-dashboard-grid {
+  align-items: start;
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: minmax(340px, 0.78fr) minmax(0, 1.45fr);
   margin-bottom: 1rem;
 }
 
@@ -129,6 +248,19 @@ textarea {
   min-height: 2.4rem;
   padding: 0.5rem 0.65rem;
   width: 100%;
+}
+
+.portal-check {
+  align-items: center;
+  color: #334155;
+  display: flex;
+  font-weight: 800;
+  gap: 0.55rem;
+}
+
+.portal-check input {
+  min-height: auto;
+  width: auto;
 }
 
 .portal-list {
@@ -178,6 +310,137 @@ textarea {
   grid-template-columns: minmax(0, 1fr) auto auto;
 }
 
+.portal-panel-title {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.85rem;
+}
+
+.portal-panel-title h2,
+.portal-panel-title span {
+  margin: 0;
+}
+
+.portal-panel-title span,
+.supplier-profile-card span,
+.supplier-product-card span,
+.opportunity-list small {
+  color: #64748b;
+}
+
+.profile-readiness-grid,
+.supplier-catalog-grid,
+.opportunity-list,
+.supplier-quotes-list {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.profile-readiness-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.supplier-profile-card,
+.supplier-product-card,
+.supplier-quote-card {
+  align-items: center;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  display: grid;
+  gap: 0.7rem;
+  padding: 0.8rem;
+}
+
+.supplier-profile-card {
+  grid-template-columns: minmax(0, 1fr) auto auto auto;
+}
+
+.supplier-product-card {
+  grid-template-columns: minmax(0, 1fr) auto auto auto;
+}
+
+.supplier-quote-card {
+  grid-template-columns: minmax(0, 1fr) auto auto auto auto;
+}
+
+.supplier-profile-card strong,
+.supplier-profile-card span,
+.supplier-product-card strong,
+.supplier-product-card span,
+.supplier-quote-card strong,
+.supplier-quote-card span,
+.opportunity-list strong,
+.opportunity-list small {
+  display: block;
+}
+
+.portal-chip {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 999px;
+  color: #334155;
+  display: inline-flex;
+  font-size: 0.85rem;
+  font-weight: 900;
+  justify-self: start;
+  padding: 0.22rem 0.6rem;
+  white-space: nowrap;
+}
+
+.portal-chip.warning {
+  background: #fff7ed;
+  border-color: #fed7aa;
+  color: #c2410c;
+}
+
+.card-actions {
+  display: flex;
+  gap: 0.45rem;
+}
+
+.light-button,
+.danger-button {
+  border: 0;
+  border-radius: 6px;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 900;
+  min-height: 2.25rem;
+  padding: 0.45rem 0.7rem;
+}
+
+.light-button {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+.danger-button {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.opportunity-list button {
+  align-items: center;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  color: #0f172a;
+  cursor: pointer;
+  display: flex;
+  font: inherit;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.8rem;
+  text-align: left;
+}
+
+.opportunity-list button:hover {
+  border-color: #0f766e;
+  box-shadow: inset 3px 0 0 #0f766e;
+}
+
 @media (max-width: 860px) {
   .portal-hero {
     align-items: stretch;
@@ -185,22 +448,37 @@ textarea {
   }
 
   .portal-grid,
+  .supplier-dashboard-grid,
+  .supplier-public-grid,
+  .supplier-public-hero,
   .portal-search,
-  .portal-list.compact {
+  .portal-list.compact,
+  .profile-readiness-grid {
     grid-template-columns: 1fr;
+  }
+
+  .supplier-public-actions,
+  .supplier-public-band {
+    align-items: stretch;
+    display: grid;
   }
 }
 
 @media (max-width: 980px) {
-  .portal-metrics {
+  .portal-metrics,
+  .portal-metrics.supplier-metrics,
+  .supplier-public-metrics {
     grid-template-columns: 1fr;
   }
 }
 
 @media (max-width: 560px) {
   .portal-row,
+  .supplier-profile-card,
+  .supplier-product-card,
   .portal-list.compact .portal-row,
   .quote-form + .portal-list .portal-row,
+  .supplier-quote-card,
   .two-fields {
     grid-template-columns: 1fr;
   }

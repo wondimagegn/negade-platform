@@ -24,31 +24,39 @@ export class LoginPageComponent implements OnInit {
   errorMessage = '';
 
   readonly loginForm = this.fb.nonNullable.group({
-    phoneNumber: ['', [Validators.required]],
+    identifier: ['', [Validators.required]],
     password: ['', [Validators.required]]
   });
 
   readonly registerForm = this.fb.nonNullable.group({
     fullName: ['', [Validators.required, Validators.maxLength(200)]],
     phoneNumber: ['', [Validators.required]],
+    userName: [''],
     email: [''],
     password: ['', [Validators.required]]
   });
 
   ngOnInit(): void {
     this.audience = this.route.snapshot.data['audience'] === 'admin' ? 'admin' : 'trader';
+    this.mode = this.audience === 'admin' ? 'login' : this.mode;
 
-    if (this.authService.currentUser) {
+    const currentUser = this.authService.currentUser;
+    if (currentUser && (this.audience !== 'admin' || currentUser.role === 'Admin')) {
       this.router.navigateByUrl(this.returnUrl);
+      return;
+    }
+
+    if (currentUser && this.audience === 'admin') {
+      this.authService.logout();
     }
   }
 
   get title(): string {
-    return this.audience === 'admin' ? 'Admin sign in' : 'Buyer and supplier sign in';
+    return this.audience === 'admin' ? 'Backoffice sign in' : 'Buyer and supplier sign in';
   }
 
   get returnUrl(): string {
-    return this.route.snapshot.queryParamMap.get('returnUrl') || (this.audience === 'admin' ? '/admin' : '/');
+    return this.route.snapshot.queryParamMap.get('returnUrl') || (this.audience === 'admin' ? '/backoffice' : '/portal/buyer');
   }
 
   login(): void {
@@ -64,7 +72,7 @@ export class LoginPageComponent implements OnInit {
       .pipe(finalize(() => (this.authenticating = false)))
       .subscribe({
         next: () => this.router.navigateByUrl(this.returnUrl),
-        error: () => (this.errorMessage = 'Could not sign in with those credentials.')
+        error: () => (this.errorMessage = 'Could not sign in with that email, username, phone, and password.')
       });
   }
 
@@ -81,7 +89,7 @@ export class LoginPageComponent implements OnInit {
       .pipe(finalize(() => (this.authenticating = false)))
       .subscribe({
         next: () => this.router.navigateByUrl(this.returnUrl),
-        error: () => (this.errorMessage = 'Could not create this account. The phone may already be registered.')
+        error: () => (this.errorMessage = 'Could not create this account. The phone, username, or email may already be registered.')
       });
   }
 }

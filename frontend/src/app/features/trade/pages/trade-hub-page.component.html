@@ -1,352 +1,139 @@
-<section class="workspace-header">
+<section class="trade-hero">
   <div>
-    <p class="eyebrow">Ethiopia B2B Trade</p>
-    <h1>Verified supply, market availability, and RFQs in one workflow</h1>
+    <p>Ethiopia B2B Trade Hub</p>
+    <h1>Discover verified suppliers, active RFQs, and available products</h1>
+    <span>Search the market, compare trusted suppliers, and move into the buyer or supplier portal when you are ready to act.</span>
   </div>
-  <button type="button" (click)="loadDashboard()" [disabled]="loading">Refresh</button>
-</section>
-
-<p *ngIf="errorMessage" class="error">{{ errorMessage }}</p>
-<p *ngIf="successMessage" class="success">{{ successMessage }}</p>
-
-<section class="panel auth-panel">
-  <div>
-    <h2>{{ currentUser ? 'Signed In' : 'Trader Account' }}</h2>
-    <p class="empty" *ngIf="currentUser">{{ currentUser.fullName }} • {{ currentUser.phoneNumber }}</p>
-  </div>
-
-  <button *ngIf="currentUser" type="button" (click)="logout()">Logout</button>
-
-  <div class="auth-grid" *ngIf="!currentUser">
-    <form [formGroup]="loginForm" (ngSubmit)="login()" class="inline-auth">
-      <input type="tel" formControlName="phoneNumber" placeholder="Phone" />
-      <input type="password" formControlName="password" placeholder="Password" />
-      <button type="submit" [disabled]="authenticating">Login</button>
-    </form>
-
-    <form [formGroup]="registerForm" (ngSubmit)="register()" class="inline-auth">
-      <input type="text" formControlName="fullName" placeholder="Full name" />
-      <input type="tel" formControlName="phoneNumber" placeholder="Phone" />
-      <input type="email" formControlName="email" placeholder="Email" />
-      <input type="password" formControlName="password" placeholder="Password" />
-      <button type="submit" [disabled]="authenticating">Register</button>
-    </form>
+  <div class="hero-actions">
+    <a routerLink="/portal/buyer">Start Buying</a>
+    <a routerLink="/portal/supplier">Start Supplying</a>
   </div>
 </section>
 
-<section class="metrics-grid">
+<p *ngIf="errorMessage" class="notice error">{{ errorMessage }}</p>
+<p *ngIf="successMessage" class="notice success">{{ successMessage }}</p>
+
+<section class="trade-search-panel">
+  <form [formGroup]="searchForm" (ngSubmit)="searchProducts()" class="trade-search">
+    <label>
+      Product
+      <input type="search" formControlName="search" placeholder="Search teff, cement, coffee..." />
+    </label>
+    <label>
+      Category
+      <select formControlName="category">
+        <option value="">All categories</option>
+        <option *ngFor="let category of categoryOptions" [value]="category">{{ category }}</option>
+      </select>
+    </label>
+    <label>
+      Region
+      <select formControlName="region">
+        <option value="">All regions</option>
+        <option *ngFor="let region of regionOptions" [value]="region">{{ region }}</option>
+      </select>
+    </label>
+    <button type="submit" [disabled]="loading">Search Market</button>
+  </form>
+</section>
+
+<section class="trade-metrics">
   <article>
     <strong>{{ products.length }}</strong>
     <span>Available products</span>
   </article>
   <article>
     <strong>{{ suppliers.length }}</strong>
-    <span>Business profiles</span>
+    <span>Supplier profiles</span>
   </article>
   <article>
     <strong>{{ rfqs.length }}</strong>
-    <span>Open RFQs</span>
+    <span>Active RFQs</span>
   </article>
   <article>
-    <strong>{{ quotes.length }}</strong>
-    <span>Quotes viewed</span>
+    <strong>{{ verifiedSuppliers.length }}</strong>
+    <span>Verified suppliers</span>
   </article>
 </section>
 
-<section class="panel">
-  <div class="panel-title">
-    <h2>Market Discovery</h2>
-    <span *ngIf="loading">Loading...</span>
-  </div>
+<section class="trade-grid">
+  <article class="trade-panel wide">
+    <div class="panel-title">
+      <div>
+        <p>Marketplace</p>
+        <h2>Available Products</h2>
+      </div>
+      <span *ngIf="loading">Loading...</span>
+    </div>
 
-  <form [formGroup]="searchForm" (ngSubmit)="searchProducts()" class="search-grid">
-    <label>
-      Search
-      <input type="search" formControlName="search" placeholder="Teff, cement, coffee..." />
-    </label>
-    <label>
-      Category
-      <input type="text" formControlName="category" placeholder="Agriculture" />
-    </label>
-    <label>
-      Region
-      <input type="text" formControlName="region" placeholder="Oromia" />
-    </label>
-    <button type="submit" [disabled]="loading">Search</button>
-  </form>
+    <div class="product-cards" *ngIf="products.length > 0; else emptyProducts">
+      <article class="product-card" *ngFor="let product of products">
+        <div>
+          <h3>{{ product.name }}</h3>
+          <p>{{ product.category }} - {{ product.region || 'Any region' }} / {{ product.city || 'Any city' }}</p>
+        </div>
+        <div class="product-meta">
+          <span>{{ product.price | number:'1.2-2' }} ETB / {{ product.unit }}</span>
+          <span>{{ product.availableQuantity | number:'1.0-2' }} available</span>
+        </div>
+        <div class="supplier-line">
+          <strong>{{ product.supplierName || 'Unassigned supplier' }}</strong>
+          <span>{{ product.isAvailable ? 'Available' : 'Unavailable' }}</span>
+        </div>
+      </article>
+    </div>
 
-  <div class="product-grid" *ngIf="products.length > 0; else emptyProducts">
-    <article class="product-row" *ngFor="let product of products">
-      <div>
-        <h3>{{ product.name }}</h3>
-        <p>{{ product.category }} • {{ product.region || 'Region not set' }} {{ product.city ? '/ ' + product.city : '' }}</p>
+    <ng-template #emptyProducts>
+      <p class="empty">No matching products yet.</p>
+    </ng-template>
+  </article>
+
+  <aside class="trade-side">
+    <article class="trade-panel">
+      <div class="panel-title">
+        <div>
+          <p>Supplier Directory</p>
+          <h2>Trusted Suppliers</h2>
+        </div>
       </div>
-      <div>
-        <strong>{{ product.price | number:'1.2-2' }} ETB</strong>
-        <span>per {{ product.unit }}</span>
-      </div>
-      <div>
-        <strong>{{ product.availableQuantity | number:'1.0-2' }}</strong>
-        <span>available</span>
-      </div>
-      <div>
-        <strong>{{ product.supplierName || 'Unassigned supplier' }}</strong>
-        <span>{{ product.isAvailable ? 'Available' : 'Unavailable' }}</span>
+      <div class="supplier-list">
+        <div class="supplier-card" *ngFor="let supplier of verifiedSuppliers.slice(0, 5)">
+          <div>
+            <strong>{{ supplier.businessName }}</strong>
+            <span>{{ supplier.businessType }} - {{ supplier.region }} / {{ supplier.city }}</span>
+          </div>
+          <span class="trust-chip">{{ supplier.ratingAverage | number:'1.1-1' }} rating</span>
+        </div>
+        <p *ngIf="verifiedSuppliers.length === 0" class="empty">Verified suppliers will appear here.</p>
       </div>
     </article>
+
+    <article class="trade-panel action-panel">
+      <h2>Ready to trade?</h2>
+      <a routerLink="/portal/buyer">Post an RFQ</a>
+      <a routerLink="/portal/supplier">Respond as Supplier</a>
+    </article>
+  </aside>
+</section>
+
+<section class="trade-panel">
+  <div class="panel-title">
+    <div>
+      <p>RFQ Board</p>
+      <h2>Buyer Demand</h2>
+    </div>
+    <a routerLink="/portal/buyer" class="text-link">Create RFQ</a>
   </div>
 
-  <ng-template #emptyProducts>
-    <p class="empty">No matching products yet.</p>
-  </ng-template>
-</section>
-
-<section class="two-column">
-  <article class="panel">
-    <h2>Create RFQ</h2>
-    <form [formGroup]="rfqForm" (ngSubmit)="createRfq()" class="form-stack">
-      <label>
-        Buyer Name
-        <input type="text" formControlName="buyerName" />
-      </label>
-      <label>
-        Phone
-        <input type="tel" formControlName="buyerPhoneNumber" />
-      </label>
-      <label>
-        Business Name
-        <input type="text" formControlName="buyerBusinessName" />
-      </label>
-      <label>
-        Product Needed
-        <input type="text" formControlName="productName" />
-      </label>
-      <div class="inline-fields">
-        <label>
-          Category
-          <input type="text" formControlName="category" />
-        </label>
-        <label>
-          Quantity
-          <input type="number" formControlName="quantity" min="0.01" step="0.01" />
-        </label>
-      </div>
-      <div class="inline-fields">
-        <label>
-          Unit
-          <input type="text" formControlName="unit" />
-        </label>
-        <label>
-          Region
-          <input type="text" formControlName="deliveryRegion" />
-        </label>
-      </div>
-      <label>
-        City
-        <input type="text" formControlName="deliveryCity" />
-      </label>
-      <label>
-        Notes
-        <textarea rows="3" formControlName="notes"></textarea>
-      </label>
-      <button type="submit" [disabled]="savingRfq">Submit RFQ</button>
-    </form>
-  </article>
-
-  <article class="panel">
-    <h2>Register Supplier</h2>
-    <form [formGroup]="supplierForm" (ngSubmit)="createSupplier()" class="form-stack">
-      <label>
-        Business Name
-        <input type="text" formControlName="businessName" />
-      </label>
-      <label>
-        Owner Name
-        <input type="text" formControlName="ownerName" />
-      </label>
-      <label>
-        TIN
-        <input type="text" formControlName="tinNumber" />
-      </label>
-      <label>
-        Phone
-        <input type="tel" formControlName="phoneNumber" />
-      </label>
-      <div class="inline-fields">
-        <label>
-          Region
-          <input type="text" formControlName="region" />
-        </label>
-        <label>
-          City
-          <input type="text" formControlName="city" />
-        </label>
-      </div>
-      <label>
-        Address
-        <input type="text" formControlName="address" />
-      </label>
-      <label>
-        Business Type
-        <input type="text" formControlName="businessType" />
-      </label>
-      <button type="submit" [disabled]="savingSupplier">Create Profile</button>
-    </form>
-  </article>
-</section>
-
-<section class="two-column">
-  <article class="panel">
-    <h2>Submit Quote</h2>
-    <form [formGroup]="quoteForm" (ngSubmit)="createQuote()" class="form-stack">
-      <label>
-        RFQ
-        <select formControlName="rfqId" (change)="loadQuotes($any($event.target).value)">
-          <option value="">Select RFQ</option>
-          <option *ngFor="let rfq of rfqs" [value]="rfq.id">{{ rfq.productName }} • {{ rfq.deliveryRegion }}</option>
-        </select>
-      </label>
-      <label>
-        Supplier Profile
-        <select formControlName="supplierId">
-          <option value="">Select supplier</option>
-          <option *ngFor="let supplier of suppliers" [value]="supplier.id">{{ supplier.businessName }}</option>
-        </select>
-      </label>
-      <div class="inline-fields">
-        <label>
-          Unit Price
-          <input type="number" formControlName="unitPrice" min="0.01" step="0.01" />
-        </label>
-        <label>
-          Available Quantity
-          <input type="number" formControlName="quantityAvailable" min="0.01" step="0.01" />
-        </label>
-      </div>
-      <label>
-        Delivery Days
-        <input type="number" formControlName="deliveryTimeInDays" min="0" step="1" />
-      </label>
-      <label>
-        Notes
-        <textarea rows="3" formControlName="notes"></textarea>
-      </label>
-      <button type="submit" [disabled]="savingQuote || !currentUser">Submit Quote</button>
-    </form>
-  </article>
-
-  <article class="panel">
-    <h2>Quotes</h2>
-    <div class="list-row" *ngFor="let quote of quotes">
+  <div class="rfq-board">
+    <article class="rfq-card" *ngFor="let rfq of rfqs.slice(0, 8)">
       <div>
-        <strong>{{ quote.supplierName }}</strong>
-        <span>{{ quote.unitPrice | number:'1.2-2' }} ETB • {{ quote.quantityAvailable | number:'1.0-2' }} available • {{ quote.deliveryTimeInDays }} days</span>
+        <h3>{{ rfq.productName }}</h3>
+        <p>{{ rfq.quantity | number:'1.0-2' }} {{ rfq.unit }} - {{ rfq.deliveryRegion }} / {{ rfq.deliveryCity }}</p>
       </div>
-      <span class="pill">Quote</span>
-    </div>
-    <p *ngIf="quotes.length === 0" class="empty">Select an RFQ to view quotes.</p>
-  </article>
-</section>
-
-<section class="two-column">
-  <article class="panel">
-    <h2>Verification</h2>
-    <form [formGroup]="verificationForm" (ngSubmit)="verifySupplier()" class="form-stack">
-      <label>
-        Supplier
-        <select formControlName="supplierId">
-          <option value="">Select supplier</option>
-          <option *ngFor="let supplier of suppliers" [value]="supplier.id">{{ supplier.businessName }}</option>
-        </select>
-      </label>
-      <label>
-        Status
-        <select formControlName="verificationStatus">
-          <option value="Pending">Pending</option>
-          <option value="Verified">Verified</option>
-          <option value="Rejected">Rejected</option>
-        </select>
-      </label>
-      <button type="submit" [disabled]="savingTrust || !currentUser">Update Verification</button>
-    </form>
-  </article>
-
-  <article class="panel">
-    <h2>Ratings & Trade History</h2>
-    <form [formGroup]="ratingForm" (ngSubmit)="createRating()" class="form-stack trust-form">
-      <label>
-        Supplier
-        <select formControlName="supplierId">
-          <option value="">Select supplier</option>
-          <option *ngFor="let supplier of suppliers" [value]="supplier.id">{{ supplier.businessName }}</option>
-        </select>
-      </label>
-      <div class="inline-fields">
-        <label>
-          Rating
-          <input type="number" formControlName="score" min="1" max="5" step="1" />
-        </label>
-        <label>
-          Comment
-          <input type="text" formControlName="comment" />
-        </label>
-      </div>
-      <button type="submit" [disabled]="savingTrust || !currentUser">Add Rating</button>
-    </form>
-
-    <form [formGroup]="historyForm" (ngSubmit)="createTradeHistory()" class="form-stack trust-form">
-      <label>
-        Supplier
-        <select formControlName="supplierId">
-          <option value="">Select supplier</option>
-          <option *ngFor="let supplier of suppliers" [value]="supplier.id">{{ supplier.businessName }}</option>
-        </select>
-      </label>
-      <label>
-        Trade Description
-        <input type="text" formControlName="description" />
-      </label>
-      <div class="inline-fields">
-        <label>
-          Counterparty
-          <input type="text" formControlName="counterpartyName" />
-        </label>
-        <label>
-          Amount
-          <input type="number" formControlName="amount" min="0" step="0.01" />
-        </label>
-      </div>
-      <label>
-        Trade Date
-        <input type="date" formControlName="tradeDate" />
-      </label>
-      <button type="submit" [disabled]="savingTrust || !currentUser">Add Trade Record</button>
-    </form>
-  </article>
-</section>
-
-<section class="two-column">
-  <article class="panel">
-    <h2>Recent RFQs</h2>
-    <div class="list-row" *ngFor="let rfq of rfqs">
-      <div>
-        <strong>{{ rfq.productName }}</strong>
-        <span>{{ rfq.quantity | number:'1.0-2' }} {{ rfq.unit }} • {{ rfq.deliveryRegion }}</span>
-      </div>
-      <span class="pill">{{ rfq.quoteCount }} quotes</span>
-    </div>
+      <span>{{ rfq.status }}</span>
+      <strong>{{ rfq.quoteCount }} quotes</strong>
+    </article>
     <p *ngIf="rfqs.length === 0" class="empty">No RFQs yet.</p>
-  </article>
-
-  <article class="panel">
-    <h2>Trusted Supplier Directory</h2>
-    <div class="list-row" *ngFor="let supplier of suppliers">
-      <div>
-        <strong>{{ supplier.businessName }}</strong>
-        <span>{{ supplier.businessType }} • {{ supplier.region }} / {{ supplier.city }} • {{ supplier.ratingAverage | number:'1.1-2' }} rating • {{ supplier.tradeCount }} trades</span>
-      </div>
-      <span class="pill">{{ supplier.verificationStatus }}</span>
-    </div>
-    <p *ngIf="suppliers.length === 0" class="empty">No supplier profiles yet.</p>
-  </article>
+  </div>
 </section>

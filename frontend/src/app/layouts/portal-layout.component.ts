@@ -25,7 +25,7 @@ import { AuthService } from '../features/trade/data-access/auth.service';
         <button type="button" (click)="logout()">Logout</button>
       </div>
       <ng-template #portalGuest>
-        <a class="portal-login" routerLink="/login">Login</a>
+        <a class="portal-login" routerLink="/login">Buyer/Supplier Login</a>
       </ng-template>
     </header>
 

@@ -12,6 +12,9 @@ public class RegisterDto
     [MaxLength(100)]
     public string PhoneNumber { get; set; } = string.Empty;
 
+    [MaxLength(256)]
+    public string? UserName { get; set; }
+
     [EmailAddress]
     [MaxLength(200)]
     public string? Email { get; set; }

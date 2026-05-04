@@ -4,11 +4,12 @@ using Microsoft.EntityFrameworkCore;
 using Negade.Application.Admin.Common;
 using Negade.Application.Common.Interfaces;
 using Negade.Domain.Entities;
+using Negade.Domain.Security;
 
 namespace Negade.Api.Controllers;
 
 [ApiController]
-[Authorize]
+[Authorize(Roles = AppRoles.Admin)]
 [Route("api/admin")]
 public class AdminTaxonomyController(IApplicationDbContext dbContext) : ControllerBase
 {

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Negade.Application.Products.Common;
 using Negade.Application.Products.Commands;
 using Negade.Application.Products.Queries;
+using Negade.Domain.Security;
 
 namespace Negade.Api.Controllers;
 
@@ -25,7 +26,7 @@ public class ProductController(IMediator mediator) : ControllerBase
         return product is null ? NotFound() : Ok(product);
     }
 
-    [Authorize]
+    [Authorize(Roles = AppRoles.Admin)]
     [HttpPost]
     public async Task<ActionResult<ProductDto>> Create([FromBody] CreateProductDto request, CancellationToken cancellationToken)
     {
@@ -33,7 +34,7 @@ public class ProductController(IMediator mediator) : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
     }
 
-    [Authorize]
+    [Authorize(Roles = AppRoles.Admin)]
     [HttpPut("{id:guid}")]
     public async Task<ActionResult<ProductDto>> Update(Guid id, [FromBody] UpdateProductDto request, CancellationToken cancellationToken)
     {
@@ -41,7 +42,7 @@ public class ProductController(IMediator mediator) : ControllerBase
         return updated is null ? NotFound() : Ok(updated);
     }
 
-    [Authorize]
+    [Authorize(Roles = AppRoles.Admin)]
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
     {
