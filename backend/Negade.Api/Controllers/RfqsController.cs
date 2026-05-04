@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Negade.Application.Rfqs.Commands;
 using Negade.Application.Rfqs.Common;
 using Negade.Application.Rfqs.Queries;
+using Negade.Domain.Security;
 
 namespace Negade.Api.Controllers;
 
@@ -33,7 +34,7 @@ public class RfqsController(IMediator mediator) : ControllerBase
         return CreatedAtAction(nameof(GetAll), new { id = created.Id }, created);
     }
 
-    [Authorize]
+    [Authorize(Roles = AppRoles.Admin)]
     [HttpPatch("{rfqId:guid}/status")]
     public async Task<ActionResult<RfqDto>> UpdateStatus(
         Guid rfqId,

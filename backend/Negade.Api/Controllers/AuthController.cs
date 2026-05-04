@@ -15,7 +15,7 @@ public class AuthController(IMediator mediator) : ControllerBase
         CancellationToken cancellationToken)
     {
         var response = await mediator.Send(new RegisterCommand(request), cancellationToken);
-        return response is null ? Conflict("Phone number is already registered.") : Ok(response);
+        return response.Response is null ? BadRequest(response.Errors) : Ok(response.Response);
     }
 
     [HttpPost("login")]
@@ -24,6 +24,6 @@ public class AuthController(IMediator mediator) : ControllerBase
         CancellationToken cancellationToken)
     {
         var response = await mediator.Send(new LoginCommand(request), cancellationToken);
-        return response is null ? Unauthorized() : Ok(response);
+        return response.Response is null ? Unauthorized(response.Errors) : Ok(response.Response);
     }
 }

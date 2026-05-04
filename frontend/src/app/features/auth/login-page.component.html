@@ -14,8 +14,8 @@
 
     <form *ngIf="mode === 'login'" [formGroup]="loginForm" (ngSubmit)="login()" class="form-stack">
       <label>
-        Phone
-        <input type="tel" formControlName="phoneNumber" autocomplete="tel" />
+        Email, username, or phone
+        <input type="text" formControlName="identifier" autocomplete="username" />
       </label>
       <label>
         Password
@@ -32,6 +32,10 @@
       <label>
         Phone
         <input type="tel" formControlName="phoneNumber" autocomplete="tel" />
+      </label>
+      <label>
+        Username
+        <input type="text" formControlName="userName" autocomplete="username" />
       </label>
       <label>
         Email

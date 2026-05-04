@@ -34,13 +34,14 @@ export class TradeHubPageComponent implements OnInit {
   successMessage = '';
 
   readonly loginForm = this.fb.nonNullable.group({
-    phoneNumber: [''],
+    identifier: [''],
     password: ['']
   });
 
   readonly registerForm = this.fb.nonNullable.group({
     fullName: [''],
     phoneNumber: [''],
+    userName: [''],
     email: [''],
     password: ['']
   });
@@ -143,7 +144,7 @@ export class TradeHubPageComponent implements OnInit {
       .subscribe({
         next: () => {
           this.successMessage = 'Account created.';
-          this.registerForm.reset({ fullName: '', phoneNumber: '', email: '', password: '' });
+          this.registerForm.reset({ fullName: '', phoneNumber: '', userName: '', email: '', password: '' });
         },
         error: () => (this.errorMessage = 'Could not register this account.')
       });
@@ -162,9 +163,9 @@ export class TradeHubPageComponent implements OnInit {
       .subscribe({
         next: () => {
           this.successMessage = 'Signed in.';
-          this.loginForm.reset({ phoneNumber: '', password: '' });
+          this.loginForm.reset({ identifier: '', password: '' });
         },
-        error: () => (this.errorMessage = 'Invalid phone number or password.')
+        error: () => (this.errorMessage = 'Invalid email, username, phone, or password.')
       });
   }
 

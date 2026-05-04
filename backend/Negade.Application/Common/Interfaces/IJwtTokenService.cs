@@ -4,5 +4,5 @@ namespace Negade.Application.Common.Interfaces;
 
 public interface IJwtTokenService
 {
-    string CreateToken(AppUser user);
+    string CreateToken(AppUser user, IEnumerable<string> roles);
 }

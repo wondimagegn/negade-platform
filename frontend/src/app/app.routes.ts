@@ -3,6 +3,7 @@ import { authGuard } from './features/auth/auth.guard';
 import { LoginPageComponent } from './features/auth/login-page.component';
 import { AdminConsolePageComponent } from './features/admin/pages/admin-console-page.component';
 import { BuyerPortalPageComponent } from './features/trade/pages/buyer-portal-page.component';
+import { SupplierPublicPageComponent } from './features/trade/pages/supplier-public-page.component';
 import { SupplierPortalPageComponent } from './features/trade/pages/supplier-portal-page.component';
 import { TradeHubPageComponent } from './features/trade/pages/trade-hub-page.component';
 import { BackofficeLayoutComponent } from './layouts/backoffice-layout.component';
@@ -17,6 +18,7 @@ export const appRoutes: Routes = [
     path: 'backoffice',
     component: BackofficeLayoutComponent,
     canActivate: [authGuard],
+    data: { role: 'Admin' },
     children: [
       { path: '', component: AdminConsolePageComponent },
       { path: 'products', component: ProductPageComponent }
@@ -28,7 +30,8 @@ export const appRoutes: Routes = [
     children: [
       { path: '', redirectTo: 'buyer', pathMatch: 'full' },
       { path: 'buyer', component: BuyerPortalPageComponent },
-      { path: 'supplier', component: SupplierPortalPageComponent, canActivate: [authGuard] },
+      { path: 'supplier', component: SupplierPublicPageComponent },
+      { path: 'supplier/workspace', component: SupplierPortalPageComponent, canActivate: [authGuard] },
       { path: 'trade', component: TradeHubPageComponent }
     ]
   },
